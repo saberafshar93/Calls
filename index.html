@@ -113,6 +113,19 @@
 
   .actions{display:flex; gap:10px}
   .actions .ghost{flex:1}
+  .groups-box{margin-top:16px; padding-top:14px; border-top:1px dashed var(--line)}
+  .groups-box h3{margin:0 0 10px; font-size:.95rem}
+  .gl{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px}
+  .gl li button{width:100%; display:flex; align-items:center; gap:12px; text-align:right; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:var(--panel2); color:var(--text)}
+  .gl li.sel button{border-color:var(--amber); box-shadow:0 0 0 2px color-mix(in srgb,var(--amber) 30%,transparent)}
+  .gl .gav{flex:none; width:40px; height:40px; border-radius:50%; background:var(--amber); color:#1b1300; display:flex; align-items:center; justify-content:center; font-weight:800}
+  .gl .gi{flex:1; min-width:0}
+  .gl .gi b{display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .gl .gi small{color:var(--muted); font-size:.78rem}
+  .opt{display:flex; align-items:flex-start; gap:10px; font-size:.85rem; color:var(--text); margin:0; cursor:pointer}
+  .opt input{width:18px; height:18px; margin-top:4px; accent-color:var(--amber); flex:none}
+  .opt-note{font-size:.76rem; color:var(--muted); margin:-4px 0 0}
+  #actCtl{gap:26px}
   .leave-wrap{margin-top:4px; padding-top:14px; border-top:1px dashed var(--line); display:flex; flex-direction:column; gap:6px}
   .leave-wrap small{color:var(--muted); font-size:.78rem; text-align:center}
 
@@ -175,10 +188,14 @@
   <section class="card" id="joinCard" hidden>
     <div class="field"><label for="name">نام شما</label><input type="text" id="name" maxlength="20" autocomplete="off"></div>
     <div class="field"><label for="room">نام گروه</label><input type="text" id="room" maxlength="40" autocomplete="off" value="main"></div>
-    <div class="field"><label for="pass">رمز گروه (اختیاری؛ همه‌ی اعضا باید یکسان بزنند)</label><input type="password" id="pass" maxlength="40" autocomplete="off"></div>
+    <div class="field"><label for="pass">رمز گروه (اختیاری؛ همه‌ی اعضا باید یکسان بزنند)</label><input type="password" id="pass" maxlength="40" autocomplete="off"><div class="note" id="passHint" style="margin:6px 0 0"></div></div>
     <button class="primary" id="joinBtn">ورود / ساخت گروه</button>
     <p class="err" id="err" role="alert"></p>
-    <p class="note">بعد از ورود، عضویت شما در این دستگاه ذخیره می‌شود و دفعه‌ی بعد که صفحه را باز کنید خودکار وارد گروه می‌شوید. فقط دکمه‌ی «ترک گروه» عضویت را پاک می‌کند.</p>
+    <div class="groups-box" id="groupsBox" hidden>
+      <h3>گروه‌های شما</h3>
+      <ul class="gl" id="groups"></ul>
+    </div>
+    <p class="note">بعد از ورود، عضویت شما در این دستگاه ذخیره می‌شود و دفعه‌ی بعد که صفحه را باز کنید خودکار وارد همان گروه می‌شوید. فقط دکمه‌ی «ترک گروه» عضویت را پاک می‌کند.</p>
   </section>
 
   <!-- اپ -->
@@ -219,15 +236,18 @@
         <input type="text" id="chatInput" maxlength="500" placeholder="پیام بنویسید…" aria-label="متن پیام" enterkeyhint="send">
         <button type="submit" id="chatSend">ارسال</button>
       </form>
+      <label class="opt"><input type="checkbox" id="chatClear"><span>با خروج من، پیام‌ها برای من پاک شود</span></label>
+      <p class="opt-note">اگر تیک نزنید، پیام‌ها مثل تاریخچه می‌مانند و با ورود دوباره می‌بینید (تا وقتی کسی در گروه باقی مانده باشد).</p>
     </div>
 
     <div class="actions">
       <button class="ghost" id="copyBtn">کپی لینک گروه</button>
-      <button class="ghost" id="exitBtn">خروج (بستن صفحه)</button>
+      <button class="ghost" id="switchBtn">گروه‌های من</button>
+      <button class="ghost" id="exitBtn">خروج</button>
     </div>
     <div class="leave-wrap">
       <button class="ghost danger" id="leaveBtn">ترک گروه</button>
-      <small>«خروج» فقط صفحه را می‌بندد و عضو می‌مانید. «ترک گروه» عضویت شما را برای همیشه پاک می‌کند.</small>
+      <small>«خروج» فقط صفحه را می‌بندد و عضو می‌مانید. «ترک گروه» عضویت را پایان می‌دهد؛ تماس‌های از دست رفته و پیام‌ها روی این دستگاه می‌مانند (مگر همه‌ی اعضا گروه را ترک کرده باشند).</small>
     </div>
   </section>
 
@@ -255,6 +275,7 @@
     </div>
     <div class="ctl" id="actCtl" hidden>
       <div class="cw"><button class="cbtn grey" id="muteBtn" aria-label="بی‌صدا" aria-pressed="false"><svg class="ico" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/><line id="muteSlash" x1="3" y1="3" x2="21" y2="21" hidden/></svg></button><span id="muteLbl">بی‌صدا</span></div>
+      <div class="cw" id="spkWrap" hidden><button class="cbtn grey" id="spkBtn" aria-label="بلندگو" aria-pressed="false"><svg class="ico" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></button><span>بلندگو</span></div>
       <div class="cw"><button class="cbtn red" id="hangBtn" aria-label="پایان تماس"><svg class="ico hang" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg></button><span>پایان</span></div>
     </div>
   </div>
@@ -262,7 +283,7 @@
 
 <div id="modal" hidden>
   <div class="box">
-    <p><b>ترک گروه؟</b><br>عضویت شما برای همیشه پاک می‌شود و دیگر تماس‌های این گروه را دریافت نخواهید کرد.</p>
+    <p><b>ترک گروه؟</b><br>دیگر تماس‌های این گروه را دریافت نخواهید کرد. تاریخچه‌ی تماس‌ها و پیام‌ها روی این دستگاه می‌ماند و اگر دوباره وارد شوید می‌بینید (مگر همه‌ی اعضا گروه را ترک کرده باشند).</p>
     <div class="actions"><button class="ghost danger" id="modalYes">بله، ترک کن</button><button class="ghost" id="modalNo">انصراف</button></div>
   </div>
 </div>
@@ -308,6 +329,9 @@
   const audios = new Map(), levels = new Map(), connected = new Set();
   let actx = null, masterTimer = null, tickTimer = null, levelTimer = null, blinkTimer = null, retryTimer = null;
   let ringTimer = null, ringMode = null;
+  let speakerMode = false, chatHist = [], chatCut = 0, micPromise = null, selGroup = null;
+  const spk = new Map();       // uid -> {src,gain} (مسیر بلندگو)
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform));
   let notif = null;
   const origTitle = document.title;
 
@@ -483,23 +507,61 @@
   // ---------- chat (فقط در حافظه) ----------
   const chatLog = $('chatLog');
   const EMPTY_HTML = '<div id="chatEmpty">هنوز پیامی نیست. پیام‌ها ذخیره نمی‌شوند.</div>';
-  function addChat(name, text, self){
-    const e = $('chatEmpty'); if (e) e.remove();
-    const near = chatLog.scrollHeight - chatLog.scrollTop - chatLog.clientHeight < 60;
-    const box = document.createElement('div'); box.className = 'msg' + (self ? ' self' : '');
-    const w = document.createElement('div'); w.className = 'who'; w.textContent = name;
-    const t = document.createElement('div'); t.className = 'txt'; t.dir = 'auto'; t.textContent = text;
-    const tm = document.createElement('time'); tm.textContent = fmtTime(Date.now()).replace('امروز ', '');
-    box.append(w, t, tm); chatLog.append(box);
-    while (chatLog.children.length > 300) chatLog.firstElementChild.remove();
-    if (near || self) chatLog.scrollTop = chatLog.scrollHeight;
+  // تاریخچه‌ی پیام‌ها: روی هر دستگاه ذخیره و بین اعضا همگام می‌شود
+  function loadChat(){
+    const clr = !!LS.get(k('chatclear'), false);
+    $('chatClear').checked = clr;
+    chatCut = clr ? Date.now() : 0;
+    if (clr) LS.del(k('chat'));
+    chatHist = clr ? [] : (LS.get(k('chat'), []) || []).filter(validMsg);
+    renderChat(true);
   }
+  function saveChat(){
+    if ($('chatClear').checked) LS.del(k('chat')); else LS.set(k('chat'), chatHist.slice(-500));
+  }
+  function validMsg(m){
+    return m && typeof m.id === 'string' && m.id.length <= 40 && isUid(m.u) && typeof m.x === 'string' && m.x.trim() && typeof m.ts === 'number';
+  }
+  function addMsg(m){
+    if (!validMsg(m) || m.ts < chatCut || chatHist.some(x => x.id === m.id)) return false;
+    chatHist.push({ id: m.id, u: m.u, n: clean(m.n) || 'ناشناس', x: m.x.slice(0, 500), ts: m.ts });
+    return true;
+  }
+  function finishMsgs(self){
+    chatHist.sort((a, b) => a.ts - b.ts);
+    if (chatHist.length > 500) chatHist = chatHist.slice(-500);
+    saveChat(); renderChat(self);
+  }
+  function renderChat(forceBottom){
+    const near = chatLog.scrollHeight - chatLog.scrollTop - chatLog.clientHeight < 60;
+    chatLog.innerHTML = '';
+    if (!chatHist.length) { chatLog.innerHTML = EMPTY_HTML; return; }
+    chatHist.forEach(m => {
+      const self = m.u === uid;
+      const box = document.createElement('div'); box.className = 'msg' + (self ? ' self' : '');
+      const w = document.createElement('div'); w.className = 'who'; w.textContent = self ? myName : (nameOf(m.u) !== 'ناشناس' ? nameOf(m.u) : m.n);
+      const t = document.createElement('div'); t.className = 'txt'; t.dir = 'auto'; t.textContent = m.x;
+      const tm = document.createElement('time'); tm.textContent = fmtTime(m.ts).replace('امروز ', '');
+      box.append(w, t, tm); chatLog.append(box);
+    });
+    if (near || forceBottom) chatLog.scrollTop = chatLog.scrollHeight;
+  }
+  function sendHist(u){
+    const all = chatHist.slice(-200);
+    for (let i = 0; i < all.length; i += 25) sendTo(u, { t: 'hist', ms: all.slice(i, i + 25) });
+  }
+  $('chatClear').addEventListener('change', e => {
+    LS.set(k('chatclear'), e.target.checked);
+    if (e.target.checked) LS.del(k('chat')); else saveChat();
+  });
   $('chatForm').addEventListener('submit', e => {
     e.preventDefault();
     const inp = $('chatInput'); const text = inp.value.trim().slice(0, 500);
     if (!text || !me) return;
-    broadcast({ t: 'chat', x: text });
-    addChat(myName, text, true); inp.value = ''; inp.focus();
+    const msg = { id: uid.slice(0, 6) + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), u: uid, n: myName, x: text, ts: Date.now() };
+    addMsg(msg); finishMsgs(true);
+    broadcast({ t: 'chat', m: msg });
+    inp.value = ''; inp.focus();
   });
 
   // ---------- networking ----------
@@ -637,15 +699,22 @@
         saveRoster();
         lateRing(u);
         deliverMissed(u);
+        sendHist(u);
         renderMembers(); renderCall();
         break;
       }
       case 'chat': {
-        const text = String(m.x || '').slice(0, 500); if (!text.trim()) return;
-        addChat(nameOf(u), text, false); break;
+        if (m.m && m.m.u === u && addMsg(m.m)) finishMsgs(false);
+        break;
+      }
+      case 'hist': {
+        let added = false;
+        (Array.isArray(m.ms) ? m.ms.slice(0, 30) : []).forEach(x => { if (addMsg(x)) added = true; });
+        if (added) finishMsgs(false);
+        break;
       }
       case 'bye': {
-        gone.add(u); saveGone(); delete roster[u];
+        gone.add(u); saveGone(); delete roster[u]; saveRoster();
         toast(nameOf(u) + ' گروه را ترک کرد');
         const r = conns.get(u); if (r) { conns.delete(u); try { r.conn.close(); } catch (e) {} }
         renderMembers(); break;
@@ -706,23 +775,54 @@
   }
 
   // ---------- calls ----------
+  // میکروفن یک بار گرفته و تمام مدت اپ نگه داشته می‌شود (خارج از تماس خاموش/ساکت است) تا هر بار مجوز نخواهد
   async function ensureMic(){
-    if (localStream) return localStream;
-    localStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: false });
-    muted = false; applyMute();
-    return localStream;
+    if (localStream && localStream.getAudioTracks().some(t => t.readyState === 'live')) return localStream;
+    if (!micPromise) {
+      micPromise = navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: false })
+        .then(s => { localStream = s; applyMute(); return s; })
+        .finally(() => { micPromise = null; });
+    }
+    return micPromise;
+  }
+  function setAudioSession(t){ try { if (navigator.audioSession) navigator.audioSession.type = t; } catch (e) {} }
+  function updateSpeakerBtn(){ $('spkBtn').classList.toggle('active', speakerMode); $('spkBtn').setAttribute('aria-pressed', String(speakerMode)); }
+  // پیش‌فرض: خروجی گوشی (earpiece). حالت بلندگو: پخش از مسیر WebAudio
+  function applyRoute(u){
+    const a = audios.get(u); if (!a) return;
+    const o = spk.get(u); if (o) { try { o.src.disconnect(); o.gain.disconnect(); } catch (e) {} spk.delete(u); }
+    if (speakerMode && actx && a.srcObject) {
+      try {
+        const src = actx.createMediaStreamSource(a.srcObject), gain = actx.createGain();
+        gain.gain.value = vol; src.connect(gain); gain.connect(actx.destination);
+        spk.set(u, { src, gain }); a.muted = true; return;
+      } catch (e) {}
+    }
+    a.muted = false; a.volume = vol;
+  }
+  function setSpeaker(v){
+    speakerMode = v; updateSpeakerBtn();
+    setAudioSession(v ? 'auto' : 'play-and-record');
+    audios.forEach((_, u) => applyRoute(u));
+    unlockAudio();
   }
   function releaseMic(){
     if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
     muted = false; applyMute();
   }
   function applyMute(){
-    if (localStream) localStream.getAudioTracks().forEach(t => { t.enabled = !muted; });
+    if (localStream) localStream.getAudioTracks().forEach(t => { t.enabled = !!call && !muted; });
     $('muteBtn').classList.toggle('active', muted); $('muteBtn').setAttribute('aria-pressed', String(muted));
     $('muteSlash').hidden = !muted; $('muteLbl').textContent = muted ? 'باصدا' : 'بی‌صدا';
   }
   $('muteBtn').addEventListener('click', () => { muted = !muted; applyMute(); });
-  $('vol').addEventListener('input', e => { vol = parseFloat(e.target.value); audios.forEach(a => { a.volume = vol; }); });
+  $('vol').addEventListener('input', e => {
+    vol = parseFloat(e.target.value);
+    audios.forEach(a => { a.volume = vol; });
+    spk.forEach(o => { o.gain.gain.value = vol; });
+  });
+  $('spkWrap').hidden = !isMobile;
+  $('spkBtn').addEventListener('click', () => setSpeaker(!speakerMode));
 
   async function startCall(){
     unlockAudio();
@@ -730,7 +830,7 @@
     if (!Object.keys(roster).length) { toast('هنوز عضو دیگری در گروه نیست'); return; }
     if (!me || !me.id || me.disconnected) { toast('به سرور وصل نیستید'); return; }
     try { await ensureMic(); } catch (e) { toast('دسترسی به میکروفون داده نشد'); return; }
-    if (call || incoming) { releaseMic(); return; }
+    if (call || incoming) return;
     const cid = uid + '.' + Date.now().toString(36);
     call = { cid, dir: 'out', starter: uid, starterName: myName, ts: Date.now(), joined: new Set([uid]), ringing: new Set(), declined: new Set(), state: 'ringing', startAt: 0, ringOpen: true, timer: null };
     const offline = [];
@@ -743,6 +843,7 @@
       broadcast({ t: 'missedRelay', e });
     }
     logUpsert({ id: cid, dir: 'out', who: roomName, ts: call.ts, status: 'noanswer' });
+    speakerMode = false; updateSpeakerBtn(); setAudioSession('play-and-record'); applyMute();
     startRing('back');
     call.timer = setTimeout(ringTimeout, RING_MS);
     startCallUI(); renderMembers(); renderCall();
@@ -814,10 +915,11 @@
     unlockAudio();
     const inc = incoming;
     try { await ensureMic(); } catch (e) { toast('دسترسی به میکروفون داده نشد'); declineIncoming(); return; }
-    if (incoming !== inc) { if (!call) releaseMic(); return; }  // در این فاصله لغو شد
+    if (incoming !== inc) return;  // در این فاصله لغو شد
     clearIncoming();
     call = { cid: inc.cid, dir: 'in', starter: inc.from, starterName: inc.fromName, ts: inc.ts, joined: new Set([uid, inc.from]), ringing: new Set(), declined: new Set(), state: 'active', startAt: Date.now(), ringOpen: false, timer: null };
     logUpsert({ id: inc.cid, dir: 'in', who: inc.fromName, ts: inc.ts, status: 'answered' });
+    speakerMode = false; updateSpeakerBtn(); setAudioSession('play-and-record'); applyMute();
     broadcast({ t: 'joined', cid: inc.cid });
     startCallUI(); renderMembers(); renderCall();
   }
@@ -836,7 +938,8 @@
     [...mc.keys()].forEach(closeMedia);
     levels.forEach(o => { try { o.src.disconnect(); } catch (e) {} }); levels.clear();
     connected.clear();
-    releaseMic();
+    speakerMode = false; updateSpeakerBtn(); setAudioSession('auto');
+    muted = false; applyMute();
     try { wakeLock && wakeLock.release(); } catch (e) {} wakeLock = null;
     if (!silent) beep(520, 0.25);
     if (!silent && reason === 'noanswer') toast('بی‌پاسخ ماند');
@@ -885,9 +988,11 @@
     if (!a) { a = document.createElement('audio'); a.autoplay = true; a.setAttribute('playsinline', ''); document.body.appendChild(a); audios.set(u, a); }
     a.srcObject = s; a.volume = vol;
     const p = a.play(); if (p && p.catch) p.catch(() => {});
+    applyRoute(u);
     watch(u, s); connected.add(u); renderCall();
   }
   function detachRemote(u){
+    const o = spk.get(u); if (o) { try { o.src.disconnect(); o.gain.disconnect(); } catch (e) {} spk.delete(u); }
     const a = audios.get(u); if (a) { a.srcObject = null; a.remove(); audios.delete(u); }
     const l = levels.get(u); if (l) { try { l.src.disconnect(); } catch (e) {} levels.delete(u); }
     connected.delete(u);
