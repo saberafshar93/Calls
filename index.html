@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1b1e18">
+<title>تماس گروهی</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1b1e18; --panel:#252921; --panel2:#2f3429; --line:#3d4435;
+    --text:#ece7d8; --muted:#a29f8d;
+    --amber:#f2a900; --live:#6fe08a; --danger:#ff5a4d;
+    --green:#34c759; --green-lo:#1f8a3b; --red:#ff3b30; --red-lo:#b3211a;
+    color-scheme:dark;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#dcd8c6; --panel:#ece8d8; --panel2:#e2decb; --line:#bdb8a0;
+      --text:#23261d; --muted:#6a6755; --amber:#b87800; --live:#1f9d45; --danger:#d1382b;
+      color-scheme:light;
+    }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:"Vazirmatn",Tahoma,"Segoe UI",system-ui,sans-serif; font-size:16px; line-height:1.7;
+    display:flex; justify-content:center;
+    padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0);
+  }
+  main{width:100%; max-width:460px; padding:18px 16px 28px; display:flex; flex-direction:column; gap:14px}
+  h1{font-size:1.15rem; font-weight:800; margin:0}
+  header{display:flex; align-items:center; justify-content:space-between}
+  .conn{display:flex; align-items:center; gap:8px; font-size:.85rem; color:var(--muted)}
+  .conn i{width:10px;height:10px;border-radius:50%;background:var(--muted);display:inline-block}
+  .conn.ok i{background:var(--live)} .conn.bad i{background:var(--danger)}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px}
+  .card h3{margin:0 0 8px; font-size:.95rem}
+  label{display:block; font-size:.85rem; color:var(--muted); margin-bottom:4px}
+  input[type=text],input[type=password]{
+    width:100%; padding:11px 12px; border-radius:8px; border:1px solid var(--line);
+    background:var(--panel2); color:var(--text); font:inherit; outline:none
+  }
+  input:focus-visible{border-color:var(--amber); box-shadow:0 0 0 2px color-mix(in srgb,var(--amber) 35%,transparent)}
+  .field{margin-bottom:12px}
+  button{font:inherit; cursor:pointer}
+  button:focus-visible{outline:3px solid var(--text); outline-offset:3px}
+  .primary{width:100%; padding:13px; border:0; border-radius:10px; background:var(--amber); color:#1b1300; font-weight:800; font-size:1rem}
+  .ghost{padding:9px 14px; border-radius:8px; border:1px solid var(--line); background:transparent; color:var(--text); font-size:.9rem}
+  .danger{border-color:var(--danger); color:var(--danger)}
+  .err{color:var(--danger); font-size:.9rem; margin:10px 0 0; min-height:1.4em}
+  .note{font-size:.82rem; color:var(--muted); margin:12px 0 0}
+  [hidden]{display:none !important}
+
+  .banner{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 14px; border-radius:12px; font-size:.88rem; border:1px solid var(--line); background:var(--panel2)}
+  .banner button{border:0; background:var(--amber); color:#1b1300; border-radius:8px; padding:5px 12px; font-weight:800; font-size:.82rem}
+  .banner.missed{border-color:var(--danger); color:var(--danger)}
+  .banner.missed button{background:var(--danger); color:#fff}
+
+  /* group head */
+  .head{text-align:center; display:flex; flex-direction:column; align-items:center; gap:6px}
+  .head .gname{font-size:1.2rem; font-weight:800}
+  .head .gsub{font-size:.85rem; color:var(--muted)}
+  #callBtn{
+    margin-top:10px; width:112px; height:112px; border-radius:50%; border:0; color:#fff;
+    background:radial-gradient(circle at 50% 35%, #62e283, var(--green) 60%, var(--green-lo));
+    box-shadow:0 7px 0 #176b2e, 0 14px 24px rgba(0,0,0,.35);
+    display:flex; align-items:center; justify-content:center; transition:transform .06s, box-shadow .06s;
+  }
+  #callBtn:active{transform:translateY(5px); box-shadow:0 2px 0 #176b2e, 0 6px 12px rgba(0,0,0,.35)}
+  #callBtn:disabled{filter:grayscale(1) brightness(.7); cursor:not-allowed}
+  #callBtn svg{width:46px;height:46px}
+  .ico{fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+
+  ul.list{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:8px}
+  .chip{display:flex; align-items:center; gap:8px; padding:5px 12px; border-radius:999px; border:1px solid var(--line); background:var(--panel2); font-size:.88rem}
+  .chip .dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+  .chip.on .dot{background:var(--live)} .chip.on{border-color:color-mix(in srgb,var(--live) 55%,var(--line))}
+  .chip.self{border-style:dashed}
+  #hint{font-size:.85rem; color:var(--muted); margin:10px 0 0}
+
+  /* call log */
+  #log{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; max-height:230px; overflow-y:auto}
+  #log li{display:flex; align-items:center; gap:10px; padding:8px 4px; border-bottom:1px solid var(--line); font-size:.9rem}
+  #log li:last-child{border-bottom:0}
+  #log .ar{font-size:1.1rem; width:1.4em; text-align:center}
+  #log .who{flex:1; min-width:0}
+  #log .who b{display:block; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  #log .who small{color:var(--muted); font-size:.75rem}
+  #log li.missed .who b,#log li.missed .ar{color:var(--danger)}
+  #log button{border:1px solid var(--line); background:transparent; color:var(--green); border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; padding:0}
+  #log button svg{width:16px;height:16px}
+  .empty{color:var(--muted); font-size:.85rem; text-align:center; padding:8px 0}
+  .switch{display:flex; align-items:center; justify-content:space-between; font-size:.92rem}
+  .switch input{width:20px;height:20px;accent-color:var(--amber)}
+
+  /* chat */
+  .chat{display:flex; flex-direction:column; gap:10px; padding:12px}
+  #chatLog{height:200px; overflow-y:scroll; overscroll-behavior:contain; display:flex; flex-direction:column; gap:8px; padding:10px; background:var(--panel2); border:1px solid var(--line); border-radius:10px; scrollbar-width:thin}
+  #chatEmpty{margin:auto; text-align:center; color:var(--muted); font-size:.85rem; max-width:26ch}
+  .msg{max-width:86%; padding:6px 10px 4px; border-radius:12px; background:var(--panel); border:1px solid var(--line); overflow-wrap:anywhere; flex:none; align-self:flex-end}
+  .msg.self{align-self:flex-start; background:color-mix(in srgb,var(--amber) 22%,var(--panel2)); border-color:color-mix(in srgb,var(--amber) 45%,var(--line))}
+  .msg .who{font-size:.74rem; font-weight:800; color:var(--amber); line-height:1.5}
+  .msg.self .who{color:var(--live)}
+  .msg .txt{font-size:.95rem; line-height:1.6}
+  .msg time{display:block; font-size:.68rem; color:var(--muted); text-align:end}
+  #chatForm{display:flex; gap:8px}
+  #chatInput{flex:1; min-width:0}
+  #chatSend{flex:none; padding:0 18px; border:0; border-radius:8px; background:var(--amber); color:#1b1300; font-weight:800}
+
+  .actions{display:flex; gap:10px}
+  .actions .ghost{flex:1}
+  .leave-wrap{margin-top:4px; padding-top:14px; border-top:1px dashed var(--line); display:flex; flex-direction:column; gap:6px}
+  .leave-wrap small{color:var(--muted); font-size:.78rem; text-align:center}
+
+  /* ====== call screen (iPhone-like) ====== */
+  #callScreen{
+    position:fixed; inset:0; z-index:50; display:flex; flex-direction:column; justify-content:space-between; align-items:center;
+    padding:calc(env(safe-area-inset-top,0) + 56px) 20px calc(env(safe-area-inset-bottom,0) + 48px);
+    background:linear-gradient(180deg,#2b3140 0%,#14161d 55%,#000 100%); color:#fff; text-align:center; overflow-y:auto;
+  }
+  #callScreen .top{display:flex; flex-direction:column; align-items:center; gap:6px; width:100%; max-width:420px}
+  .avatar{
+    width:104px; height:104px; border-radius:50%; background:linear-gradient(160deg,#8d96aa,#5b6376);
+    display:flex; align-items:center; justify-content:center; font-size:2.6rem; font-weight:800; margin-bottom:10px; position:relative
+  }
+  #callScreen[data-mode="incoming"] .avatar::after,#callScreen[data-mode="calling"] .avatar::after{
+    content:""; position:absolute; inset:-8px; border-radius:50%; border:2px solid rgba(255,255,255,.35); animation:pulse 1.6s ease-out infinite
+  }
+  @keyframes pulse{0%{transform:scale(.92);opacity:.9}100%{transform:scale(1.35);opacity:0}}
+  #csName{margin:0; font-size:2rem; font-weight:800; line-height:1.3}
+  #csSub{margin:0; opacity:.7; font-size:.95rem}
+  #csStatus{margin:4px 0 0; opacity:.9; font-size:1.05rem; font-variant-numeric:tabular-nums}
+  .tiles{display:flex; flex-wrap:wrap; justify-content:center; gap:14px; margin-top:22px}
+  .tile{width:84px; display:flex; flex-direction:column; align-items:center; gap:4px; font-size:.78rem}
+  .tile .av{width:60px;height:60px;border-radius:50%;background:#4b5265;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.3rem; border:3px solid transparent; transition:border-color .15s, box-shadow .15s}
+  .tile.speaking .av{border-color:var(--green); box-shadow:0 0 0 5px rgba(52,199,89,.28)}
+  .tile.ringing .av{animation:blink 1s ease-in-out infinite}
+  @keyframes blink{50%{opacity:.45}}
+  .tile.off .av{opacity:.4}
+  .tile b{font-weight:600; max-width:84px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .tile small{opacity:.65; font-size:.68rem}
+  .ctl{display:flex; gap:44px; align-items:flex-start; justify-content:center; width:100%}
+  .cw{display:flex; flex-direction:column; align-items:center; gap:8px; font-size:.82rem}
+  .cbtn{width:76px; height:76px; border-radius:50%; border:0; color:#fff; display:flex; align-items:center; justify-content:center; padding:0}
+  .cbtn svg{width:34px; height:34px}
+  .cbtn.red{background:var(--red)} .cbtn.green{background:var(--green)}
+  .cbtn.grey{background:rgba(255,255,255,.16)} .cbtn.grey.active{background:#fff; color:#111}
+  .cbtn.red svg.hang{transform:rotate(135deg)}
+  #callScreen[data-mode="incoming"] .cbtn.green{animation:wiggle 1.2s ease-in-out infinite}
+  @keyframes wiggle{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
+  #csVolWrap{display:flex; align-items:center; gap:10px; width:100%; max-width:300px; margin:0 auto 22px; font-size:.82rem; opacity:.85}
+  #csVolWrap input{flex:1; accent-color:var(--green)}
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important} }
+
+  #modal{position:fixed; inset:0; z-index:80; background:rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center; padding:20px}
+  #modal .box{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px; max-width:340px; width:100%}
+  #modal p{margin:0 0 16px}
+  #modal .actions{gap:10px}
+  .toast{position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom,0)); transform:translateX(-50%); background:var(--text); color:var(--bg); padding:8px 16px; border-radius:999px; font-size:.88rem; opacity:0; pointer-events:none; transition:opacity .2s; z-index:90; max-width:90vw; text-align:center}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>تماس گروهی</h1>
+    <div class="conn" id="conn"><i></i><span id="connText">آفلاین</span></div>
+  </header>
+
+  <!-- ورود -->
+  <section class="card" id="joinCard" hidden>
+    <div class="field"><label for="name">نام شما</label><input type="text" id="name" maxlength="20" autocomplete="off"></div>
+    <div class="field"><label for="room">نام گروه</label><input type="text" id="room" maxlength="40" autocomplete="off" value="main"></div>
+    <div class="field"><label for="pass">رمز گروه (اختیاری؛ همه‌ی اعضا باید یکسان بزنند)</label><input type="password" id="pass" maxlength="40" autocomplete="off"></div>
+    <button class="primary" id="joinBtn">ورود / ساخت گروه</button>
+    <p class="err" id="err" role="alert"></p>
+    <p class="note">بعد از ورود، عضویت شما در این دستگاه ذخیره می‌شود و دفعه‌ی بعد که صفحه را باز کنید خودکار وارد گروه می‌شوید. فقط دکمه‌ی «ترک گروه» عضویت را پاک می‌کند.</p>
+  </section>
+
+  <!-- اپ -->
+  <section id="app" hidden style="display:flex;flex-direction:column;gap:14px">
+    <button class="banner" id="audioBanner" hidden style="width:100%;text-align:right;color:var(--text)"><span>🔔 برای شنیده شدن صدای زنگ، یک بار روی صفحه ضربه بزنید</span></button>
+    <div class="banner" id="notifBanner" hidden><span>اعلان تماس غیرفعال است</span><button id="notifBtn">فعال‌سازی</button></div>
+    <div class="banner missed" id="missedBanner" hidden><span id="missedText"></span><button id="missedBtn">مشاهده</button></div>
+
+    <div class="card head">
+      <div class="gname" id="gName">گروه</div>
+      <div class="gsub"><span id="onlineCount">1</span> نفر آنلاین · <span id="totalCount">1</span> عضو</div>
+      <button id="callBtn" aria-label="تماس صوتی با گروه">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>
+      </button>
+      <div class="gsub">تماس گروهی</div>
+    </div>
+
+    <div class="card">
+      <h3>اعضا</h3>
+      <ul class="list" id="members"></ul>
+      <p id="hint">هنوز عضو دیگری نیست. لینک گروه را برای دوستانتان بفرستید.</p>
+    </div>
+
+    <div class="card">
+      <h3>تماس‌های اخیر</h3>
+      <ul id="log"></ul>
+      <div class="empty" id="logEmpty">هنوز تماسی ثبت نشده.</div>
+    </div>
+
+    <div class="card">
+      <label class="switch"><span>مزاحم نشوید (تماس‌ها بی‌صدا به «از دست رفته» می‌روند)</span><input type="checkbox" id="dnd"></label>
+    </div>
+
+    <div class="card chat">
+      <h3 style="margin:0">پیام‌ها</h3>
+      <div id="chatLog" role="log" aria-live="polite"><div id="chatEmpty">هنوز پیامی نیست. پیام‌ها ذخیره نمی‌شوند.</div></div>
+      <form id="chatForm" autocomplete="off">
+        <input type="text" id="chatInput" maxlength="500" placeholder="پیام بنویسید…" aria-label="متن پیام" enterkeyhint="send">
+        <button type="submit" id="chatSend">ارسال</button>
+      </form>
+    </div>
+
+    <div class="actions">
+      <button class="ghost" id="copyBtn">کپی لینک گروه</button>
+      <button class="ghost" id="exitBtn">خروج (بستن صفحه)</button>
+    </div>
+    <div class="leave-wrap">
+      <button class="ghost danger" id="leaveBtn">ترک گروه</button>
+      <small>«خروج» فقط صفحه را می‌بندد و عضو می‌مانید. «ترک گروه» عضویت شما را برای همیشه پاک می‌کند.</small>
+    </div>
+  </section>
+
+  <section class="card" id="closedCard" hidden style="text-align:center">
+    <p>صفحه بسته شد. عضویت شما در گروه حفظ شده است.</p>
+    <p class="note" style="margin-top:0">اگر تب به‌طور خودکار بسته نشد، می‌توانید آن را خودتان ببندید.</p>
+    <button class="primary" id="reopenBtn">بازگشت به برنامه</button>
+  </section>
+</main>
+
+<!-- صفحه تماس -->
+<div id="callScreen" hidden data-mode="incoming">
+  <div class="top">
+    <div class="avatar" id="csAvatar">؟</div>
+    <h2 id="csName"></h2>
+    <p id="csSub"></p>
+    <p id="csStatus"></p>
+    <div class="tiles" id="csTiles"></div>
+  </div>
+  <div style="width:100%">
+    <div id="csVolWrap" hidden><span>بلندی صدا</span><input type="range" id="vol" min="0" max="1" step="0.05" value="1" aria-label="بلندی صدا"></div>
+    <div class="ctl" id="inCtl">
+      <div class="cw"><button class="cbtn red" id="declineBtn" aria-label="رد تماس"><svg class="ico hang" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg></button><span>رد کردن</span></div>
+      <div class="cw"><button class="cbtn green" id="acceptBtn" aria-label="پاسخ به تماس"><svg class="ico" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg></button><span>پاسخ</span></div>
+    </div>
+    <div class="ctl" id="actCtl" hidden>
+      <div class="cw"><button class="cbtn grey" id="muteBtn" aria-label="بی‌صدا" aria-pressed="false"><svg class="ico" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/><line id="muteSlash" x1="3" y1="3" x2="21" y2="21" hidden/></svg></button><span id="muteLbl">بی‌صدا</span></div>
+      <div class="cw"><button class="cbtn red" id="hangBtn" aria-label="پایان تماس"><svg class="ico hang" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg></button><span>پایان</span></div>
+    </div>
+  </div>
+</div>
+
+<div id="modal" hidden>
+  <div class="box">
+    <p><b>ترک گروه؟</b><br>عضویت شما برای همیشه پاک می‌شود و دیگر تماس‌های این گروه را دریافت نخواهید کرد.</p>
+    <div class="actions"><button class="ghost danger" id="modalYes">بله، ترک کن</button><button class="ghost" id="modalNo">انصراف</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const PREFIX = 'wt2-';
+  const RING_MS = 45000;
+  // برای اتصال پایدار بین شبکه‌های مختلف (دیتای موبایل) یک سرور TURN اضافه کنید:
+  const ICE = { iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' }
+    // , { urls: 'turn:YOUR_TURN_HOST:3478', username: 'USER', credential: 'PASS' }
+  ] };
+
+  // ---------- storage ----------
+  const LS = {
+    get(k, d){ try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+    del(k){ try { localStorage.removeItem(k); } catch (e) {} }
+  };
+  let uid = LS.get(PREFIX + 'uid', null);
+  if (!uid || !/^[0-9a-f]{16}$/.test(uid)) {
+    uid = [...crypto.getRandomValues(new Uint8Array(8))].map(b => b.toString(16).padStart(2, '0')).join('');
+    LS.set(PREFIX + 'uid', uid);
+  }
+
+  // ---------- state ----------
+  let myName = '', roomName = '', roomPass = '', roomKey = '', dirId = '';
+  let me = null, dirPeer = null, dirConn = null;
+  let leaving = false, claiming = false, joining = false, dirStarted = false, peerTries = 0;
+  let roster = {}, gone = new Set(), logArr = [], outbox = [];
+  const conns = new Map();     // uid -> {uid,name,conn,outgoing}
+  const pending = new Set();
+  let incoming = null;         // {cid,from,fromName,ts,timer}
+  let call = null;             // active/outgoing call
+  let localStream = null, muted = false, vol = 1, wakeLock = null;
+  const mc = new Map();        // uid -> {call,out}
+  const audios = new Map(), levels = new Map(), connected = new Set();
+  let actx = null, masterTimer = null, tickTimer = null, levelTimer = null, blinkTimer = null, retryTimer = null;
+  let ringTimer = null, ringMode = null;
+  let notif = null;
+  const origTitle = document.title;
+
+  const k = n => PREFIX + n + '-' + roomKey;
+  const pid = u => PREFIX + roomKey + '-u-' + u;
+  const uidOf = p => { const i = String(p).indexOf('-u-'); return i < 0 ? null : p.slice(i + 3); };
+  const clean = s => String(s || '').slice(0, 20);
+  const isUid = s => typeof s === 'string' && /^[0-9a-f]{16}$/.test(s);
+  const isOnline = u => { const r = conns.get(u); return !!(r && r.conn && r.conn.open); };
+  const nameOf = u => u === uid ? myName : ((roster[u] && roster[u].name) || (conns.get(u) && conns.get(u).name) || 'ناشناس');
+
+  // ---------- helpers ----------
+  function toast(msg){
+    const t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2600);
+  }
+  function setConn(state, text){ const c = $('conn'); c.className = 'conn ' + state; $('connText').textContent = text; }
+  async function roomToKey(name, pass){
+    const data = new TextEncoder().encode('wt2|' + name.trim().toLowerCase() + '|' + pass);
+    const buf = await crypto.subtle.digest('SHA-256', data);
+    return [...new Uint8Array(buf)].slice(0, 10).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  function sendTo(u, msg){ const r = conns.get(u); try { if (r && r.conn && r.conn.open) { r.conn.send(msg); return true; } } catch (e) {} return false; }
+  function broadcast(msg){ conns.forEach(r => { try { if (r.conn && r.conn.open) r.conn.send(msg); } catch (e) {} }); }
+  function fmtTime(ts){
+    const d = new Date(ts);
+    const today = new Date(); const same = d.toDateString() === today.toDateString();
+    let t; try { t = d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', hour12: false }); } catch (e) { t = d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0'); }
+    if (same) return 'امروز ' + t;
+    try { return d.toLocaleDateString('fa-IR', { month: 'short', day: 'numeric' }) + ' ' + t; } catch (e) { return t; }
+  }
+  function fmtDur(s){ const m = Math.floor(s / 60), x = s % 60; return String(m).padStart(2, '0') + ':' + String(x).padStart(2, '0'); }
+
+  // ---------- audio: ringtone / beeps ----------
+  function initAudio(){
+    if (actx) return;
+    try { const AC = window.AudioContext || window.webkitAudioContext; actx = new AC(); masterTimer = null; actx.onstatechange = updateAudioBanner; } catch (e) {}
+    updateAudioBanner();
+  }
+  function unlockAudio(){ if (actx && actx.state !== 'running') { actx.resume().then(updateAudioBanner).catch(() => {}); } }
+  function updateAudioBanner(){ $('audioBanner').hidden = !actx || actx.state === 'running' || $('app').hidden; }
+  ['pointerdown', 'keydown', 'touchend', 'click'].forEach(ev => document.addEventListener(ev, unlockAudio, { passive: true }));
+  $('audioBanner').addEventListener('click', unlockAudio);
+
+  function tone(freq, t, dur, gain, type, overtone){
+    const g = actx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(gain, t + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    g.connect(actx.destination);
+    const o = actx.createOscillator(); o.type = type || 'sine'; o.frequency.value = freq; o.connect(g); o.start(t); o.stop(t + dur + 0.05);
+    if (overtone) {
+      const g2 = actx.createGain(); g2.gain.setValueAtTime(0.0001, t);
+      g2.gain.linearRampToValueAtTime(gain * 0.35, t + 0.004);
+      g2.gain.exponentialRampToValueAtTime(0.0001, t + dur * 0.35);
+      g2.connect(actx.destination);
+      const o2 = actx.createOscillator(); o2.type = 'triangle'; o2.frequency.value = freq * 4; o2.connect(g2); o2.start(t); o2.stop(t + dur * 0.4);
+    }
+  }
+  const MELODY = [659.25, 830.61, 987.77, 830.61, 659.25, 830.61, 987.77, 1318.5];
+  function ringIn(){
+    if (!actx) return;
+    const t = actx.currentTime + 0.05;
+    for (let r = 0; r < 2; r++) MELODY.forEach((f, i) => tone(f, t + r * 1.25 + i * 0.13, 0.55, 0.28, 'sine', true));
+    if (navigator.vibrate) try { navigator.vibrate([500, 250, 500]); } catch (e) {}
+  }
+  function ringBack(){
+    if (!actx) return;
+    const t = actx.currentTime + 0.05;
+    tone(425, t, 1.1, 0.12, 'sine', false);
+  }
+  function startRing(mode){
+    stopRing(); ringMode = mode;
+    const fn = mode === 'in' ? ringIn : ringBack;
+    fn(); ringTimer = setInterval(fn, mode === 'in' ? 3300 : 4000);
+  }
+  function stopRing(){ clearInterval(ringTimer); ringTimer = null; ringMode = null; if (navigator.vibrate) try { navigator.vibrate(0); } catch (e) {} }
+  function beep(f, d){ if (actx) try { tone(f, actx.currentTime + 0.01, d, 0.2, 'sine', false); } catch (e) {} }
+
+  // ---------- notifications ----------
+  function updateNotifBanner(){
+    const supported = 'Notification' in window;
+    $('notifBanner').hidden = $('app').hidden || !supported || Notification.permission !== 'default';
+  }
+  function askNotif(){ try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission().then(updateNotifBanner); } catch (e) {} }
+  $('notifBtn').addEventListener('click', askNotif);
+  function notify(title, body, tag, sticky){
+    try {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return null;
+      if (!document.hidden && document.hasFocus()) return null;
+      const n = new Notification(title, { body, tag, requireInteraction: !!sticky, renotify: true, icon: undefined });
+      n.onclick = () => { try { window.focus(); n.close(); } catch (e) {} };
+      return n;
+    } catch (e) { return null; }
+  }
+  function startBlink(text){
+    stopBlink(); let on = false;
+    blinkTimer = setInterval(() => { on = !on; document.title = on ? text : origTitle; }, 900);
+  }
+  function stopBlink(){ clearInterval(blinkTimer); blinkTimer = null; document.title = origTitle; }
+
+  // ---------- persistence ----------
+  const saveRoster = () => LS.set(k('roster'), roster);
+  const saveGone = () => LS.set(k('gone'), [...gone]);
+  const saveLog = () => LS.set(k('log'), logArr);
+  const saveOutbox = () => LS.set(k('outbox'), outbox);
+  function loadRoom(){
+    roster = LS.get(k('roster'), {}) || {};
+    gone = new Set(LS.get(k('gone'), []) || []);
+    logArr = LS.get(k('log'), []) || [];
+    outbox = (LS.get(k('outbox'), []) || []).filter(e => e && Date.now() - e.ts < 7 * 864e5);
+    delete roster[uid];
+    $('dnd').checked = !!LS.get(k('dnd'), false);
+  }
+
+  // ---------- call log ----------
+  function logUpsert(e){
+    const i = logArr.findIndex(x => x.id === e.id && x.dir === e.dir);
+    if (i >= 0) logArr[i] = Object.assign(logArr[i], e);
+    else { logArr.unshift(Object.assign({ seen: e.status !== 'missed' }, e)); }
+    logArr = logArr.slice(0, 60);
+    saveLog(); renderLog(); updateMissedBanner();
+  }
+  function renderLog(){
+    const ul = $('log'); ul.innerHTML = '';
+    $('logEmpty').hidden = logArr.length > 0;
+    logArr.slice(0, 20).forEach(e => {
+      const li = document.createElement('li');
+      li.className = e.status === 'missed' ? 'missed' : '';
+      const ar = document.createElement('span'); ar.className = 'ar';
+      ar.textContent = e.dir === 'out' ? '↗' : '↙';
+      const w = document.createElement('div'); w.className = 'who';
+      const b = document.createElement('b'); b.textContent = e.dir === 'out' ? 'تماس خروجی' : e.who;
+      const sm = document.createElement('small');
+      const st = { answered: 'پاسخ داده شد', missed: 'تماس از دست رفته', declined: 'رد شد', noanswer: 'بی‌پاسخ' }[e.status] || '';
+      sm.textContent = st + (e.dur ? ' · ' + fmtDur(e.dur) : '') + ' · ' + fmtTime(e.ts);
+      w.append(b, sm);
+      const btn = document.createElement('button'); btn.setAttribute('aria-label', 'تماس مجدد');
+      btn.innerHTML = '<svg class="ico" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>';
+      btn.onclick = startCall;
+      li.append(ar, w, btn); ul.append(li);
+    });
+  }
+  function updateMissedBanner(){
+    const n = logArr.filter(e => e.status === 'missed' && !e.seen).length;
+    $('missedBanner').hidden = n === 0 || $('app').hidden;
+    $('missedText').textContent = '📵 ' + n + ' تماس از دست رفته داشتید';
+  }
+  $('missedBtn').addEventListener('click', () => {
+    logArr.forEach(e => { e.seen = true; }); saveLog(); updateMissedBanner();
+    $('log').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+
+  // ---------- members UI ----------
+  function renderMembers(){
+    const ul = $('members'); ul.innerHTML = '';
+    const add = (name, on, self) => {
+      const li = document.createElement('li'); li.className = 'chip' + (on ? ' on' : '') + (self ? ' self' : '');
+      const d = document.createElement('span'); d.className = 'dot';
+      const t = document.createElement('span'); t.textContent = name + (self ? ' (شما)' : '');
+      li.append(d, t); ul.append(li);
+    };
+    add(myName, true, true);
+    const ids = Object.keys(roster);
+    ids.forEach(u => add(nameOf(u), isOnline(u), false));
+    const on = ids.filter(isOnline).length;
+    $('onlineCount').textContent = on + 1;
+    $('totalCount').textContent = ids.length + 1;
+    $('hint').hidden = ids.length > 0;
+    $('callBtn').disabled = !!(call || incoming);
+  }
+
+  // ---------- chat (فقط در حافظه) ----------
+  const chatLog = $('chatLog');
+  const EMPTY_HTML = '<div id="chatEmpty">هنوز پیامی نیست. پیام‌ها ذخیره نمی‌شوند.</div>';
+  function addChat(name, text, self){
+    const e = $('chatEmpty'); if (e) e.remove();
+    const near = chatLog.scrollHeight - chatLog.scrollTop - chatLog.clientHeight < 60;
+    const box = document.createElement('div'); box.className = 'msg' + (self ? ' self' : '');
+    const w = document.createElement('div'); w.className = 'who'; w.textContent = name;
+    const t = document.createElement('div'); t.className = 'txt'; t.dir = 'auto'; t.textContent = text;
+    const tm = document.createElement('time'); tm.textContent = fmtTime(Date.now()).replace('امروز ', '');
+    box.append(w, t, tm); chatLog.append(box);
+    while (chatLog.children.length > 300) chatLog.firstElementChild.remove();
+    if (near || self) chatLog.scrollTop = chatLog.scrollHeight;
+  }
+  $('chatForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const inp = $('chatInput'); const text = inp.value.trim().slice(0, 500);
+    if (!text || !me) return;
+    broadcast({ t: 'chat', x: text });
+    addChat(myName, text, true); inp.value = ''; inp.focus();
+  });
+
+  // ---------- networking ----------
+  function createPeer(){
+    if (leaving) return;
+    me = new Peer(pid(uid), { debug: 0, config: ICE });
+    me.on('open', () => {
+      peerTries = 0; setConn('ok', 'آنلاین');
+      if (!dirStarted) { dirStarted = true; claimDirectory(); }
+      connectAll();
+    });
+    me.on('connection', c => setupConn(c, false));
+    me.on('call', onMediaCall);
+    me.on('disconnected', () => {
+      if (leaving) return;
+      setConn('bad', 'قطع شد، اتصال مجدد…');
+      setTimeout(() => { try { if (!leaving && me && me.disconnected) me.reconnect(); } catch (e) {} }, 1500);
+    });
+    me.on('error', e => {
+      if (e.type === 'unavailable-id') {
+        try { me.destroy(); } catch (x) {}
+        me = null; dirStarted = false;
+        if (++peerTries > 6) { setConn('bad', 'این حساب در تب دیگری باز است'); return; }
+        setConn('', 'در حال اتصال…');
+        setTimeout(createPeer, 3500);
+        return;
+      }
+      if (e.type === 'peer-unavailable') {
+        const m = String(e.message || ''); const u = uidOf(m.split(' ').pop());
+        if (u) pending.delete(u);
+        if (m.includes(dirId)) { joining = false; setTimeout(claimDirectory, 800 + Math.random() * 1200); }
+        return;
+      }
+      if (['network', 'server-error', 'socket-error', 'socket-closed'].includes(e.type)) setConn('bad', 'مشکل شبکه…');
+    });
+  }
+  function connectAll(){ Object.keys(roster).forEach(connectUid); }
+  function connectUid(u){
+    if (!me || !me.id || me.disconnected || u === uid || !isUid(u) || gone.has(u) || isOnline(u) || pending.has(u)) return;
+    pending.add(u); setTimeout(() => pending.delete(u), 7000);
+    try { setupConn(me.connect(pid(u), { reliable: true }), true); } catch (e) { pending.delete(u); }
+  }
+  function setupConn(conn, outgoing){
+    const u = uidOf(conn.peer);
+    if (!isUid(u) || u === uid) { try { conn.close(); } catch (e) {} return; }
+    let rec = conns.get(u);
+    if (rec && rec.conn && rec.conn !== conn) {
+      // اتصالی که آغازگرش uid کوچک‌تر است برنده می‌شود (جلوگیری از اتصال دوتایی)
+      const a = outgoing ? uid : u, b = rec.outgoing ? uid : u;
+      if (!(a === b || a < b)) { try { conn.close(); } catch (e) {} return; }
+      const old = rec.conn; rec.conn = conn; try { old.close(); } catch (e) {}
+    }
+    if (!rec) { rec = { uid: u, name: (roster[u] && roster[u].name) || '', conn: null }; conns.set(u, rec); }
+    rec.conn = conn; rec.outgoing = outgoing;
+    const onOpen = () => { pending.delete(u); sendHi(conn); renderMembers(); };
+    if (conn.open) onOpen(); else conn.on('open', onOpen);
+    conn.on('data', m => { if (rec.conn === conn) handleMsg(rec, m); });
+    conn.on('close', () => drop(u, conn));
+    conn.on('error', () => drop(u, conn));
+  }
+  function sendHi(conn){
+    const list = Object.entries(roster).slice(0, 60).map(([u, r]) => ({ u, n: r.name }));
+    list.push({ u: uid, n: myName });
+    try { conn.send({ t: 'hi', name: myName, roster: list }); } catch (e) {}
+  }
+  function drop(u, conn){
+    const rec = conns.get(u);
+    if (!rec || rec.conn !== conn) return;
+    conns.delete(u); pending.delete(u);
+    if (incoming && incoming.from === u) missIncoming('lost');
+    if (call && call.ringing.has(u)) {
+      call.ringing.delete(u);
+      if (call.dir === 'out' && call.state === 'ringing' && call.ringing.size === 0) endCall('noanswer');
+    }
+    renderMembers(); renderCall();
+  }
+
+  // directory (برای پیدا کردن اعضای جدید)
+  function claimDirectory(){
+    if (leaving || claiming || dirConn) return;
+    claiming = true; let settled = false;
+    const dp = new Peer(dirId, { debug: 0, config: ICE });
+    dp.on('open', () => {
+      settled = true; claiming = false; dirPeer = dp;
+      dp.on('connection', onDirIncoming);
+      dp.on('disconnected', () => { if (!leaving) { try { dp.reconnect(); } catch (e) {} } });
+      joinDirectory();
+    });
+    dp.on('error', e => {
+      if (settled) return;
+      settled = true; claiming = false;
+      try { dp.destroy(); } catch (x) {}
+      if (e.type === 'unavailable-id') joinDirectory(); else setTimeout(claimDirectory, 3000);
+    });
+  }
+  const dirMembers = new Map();
+  function onDirIncoming(conn){
+    conn.on('open', () => {
+      try { conn.send({ t: 'list', ids: [...dirMembers.keys()] }); } catch (e) {}
+      dirMembers.set(conn.peer, conn);
+    });
+    const g = () => { if (dirMembers.get(conn.peer) === conn) dirMembers.delete(conn.peer); };
+    conn.on('close', g); conn.on('error', g);
+  }
+  function joinDirectory(){
+    if (leaving || joining || dirConn || !me || !me.id) return;
+    joining = true; let c;
+    try { c = me.connect(dirId, { reliable: true }); } catch (e) { joining = false; setTimeout(claimDirectory, 2000); return; }
+    const timer = setTimeout(() => { if (!dirConn) { joining = false; try { c.close(); } catch (e) {} setTimeout(claimDirectory, 500); } }, 9000);
+    c.on('open', () => { clearTimeout(timer); joining = false; dirConn = c; });
+    c.on('data', m => {
+      if (m && m.t === 'list' && Array.isArray(m.ids)) m.ids.forEach(p => {
+        const u = uidOf(p);
+        if (isUid(u) && u !== uid && !gone.has(u)) { if (!roster[u]) { roster[u] = { name: 'ناشناس' }; saveRoster(); } connectUid(u); }
+      });
+    });
+    c.on('close', () => { clearTimeout(timer); joining = false; if (dirConn === c) dirConn = null; if (!leaving) setTimeout(claimDirectory, 300 + Math.random() * 1800); });
+    c.on('error', () => {});
+  }
+
+  // ---------- messages ----------
+  function handleMsg(rec, m){
+    if (!m || typeof m !== 'object') return;
+    const u = rec.uid;
+    switch (m.t) {
+      case 'hi': {
+        rec.name = clean(m.name) || 'ناشناس';
+        gone.delete(u); saveGone();
+        roster[u] = { name: rec.name };
+        (Array.isArray(m.roster) ? m.roster.slice(0, 60) : []).forEach(x => {
+          if (!x || !isUid(x.u) || x.u === uid || gone.has(x.u)) return;
+          if (!roster[x.u]) roster[x.u] = { name: clean(x.n) || 'ناشناس' };
+          connectUid(x.u);
+        });
+        saveRoster();
+        lateRing(u);
+        deliverMissed(u);
+        renderMembers(); renderCall();
+        break;
+      }
+      case 'chat': {
+        const text = String(m.x || '').slice(0, 500); if (!text.trim()) return;
+        addChat(nameOf(u), text, false); break;
+      }
+      case 'bye': {
+        gone.add(u); saveGone(); delete roster[u];
+        toast(nameOf(u) + ' گروه را ترک کرد');
+        const r = conns.get(u); if (r) { conns.delete(u); try { r.conn.close(); } catch (e) {} }
+        renderMembers(); break;
+      }
+      case 'ring': onRing(rec, m); break;
+      case 'cancel': case 'ringend':
+        if (incoming && incoming.cid === m.cid) missIncoming('cancel'); break;
+      case 'decline': case 'busy':
+        if (call && call.cid === m.cid) {
+          call.declined.add(u); call.ringing.delete(u); renderCall();
+          if (call.dir === 'out' && call.state === 'ringing' && call.ringing.size === 0) endCall('noanswer');
+        }
+        break;
+      case 'joined':
+        if (call && call.cid === m.cid) {
+          call.joined.add(u); call.ringing.delete(u); call.declined.delete(u);
+          if (call.state === 'ringing') becomeActive();
+          callMedia(u); renderCall();
+        }
+        break;
+      case 'left':
+        if (call && call.cid === m.cid) {
+          call.joined.delete(u); closeMedia(u); renderCall(); checkEnd();
+        }
+        break;
+      case 'missedRelay': {
+        const e = m.e; if (!e || !isUid(e.from) || !Array.isArray(e.to) || typeof e.cid !== 'string') return;
+        if (e.from === uid || outbox.some(x => x.cid === e.cid)) return;
+        outbox.push({ cid: e.cid, from: e.from, fromName: clean(e.fromName), ts: +e.ts || Date.now(), to: e.to.filter(isUid).slice(0, 60) });
+        saveOutbox();
+        break;
+      }
+      case 'missed': {
+        const cid = String(m.cid || ''); if (!cid) return;
+        sendTo(u, { t: 'missedAck', cid });
+        if (logArr.some(x => x.id === cid && x.dir === 'in')) return;
+        logUpsert({ id: cid, dir: 'in', who: clean(m.fromName) || nameOf(m.from), ts: +m.ts || Date.now(), status: 'missed' });
+        toast('📵 تماس از دست رفته از ' + (clean(m.fromName) || 'ناشناس'));
+        notify('تماس از دست رفته', 'از ' + (clean(m.fromName) || 'ناشناس'), 'missed-' + cid, false);
+        break;
+      }
+      case 'missedAck': {
+        outbox.forEach(e => { if (e.cid === m.cid) e.to = e.to.filter(x => x !== u); });
+        outbox = outbox.filter(e => e.to.length); saveOutbox(); break;
+      }
+    }
+  }
+  function deliverMissed(u){
+    outbox.forEach(e => {
+      if (!e.to.includes(u) || (call && call.cid === e.cid)) return;
+      sendTo(u, { t: 'missed', cid: e.cid, from: e.from, fromName: e.fromName, ts: e.ts });
+    });
+  }
+  function lateRing(u){
+    if (call && call.ringOpen && !call.joined.has(u) && !call.declined.has(u) && !mc.has(u)) {
+      if (sendTo(u, { t: 'ring', cid: call.cid, fromName: call.starterName, ts: call.ts, late: true })) call.ringing.add(u);
+    }
+  }
+
+  // ---------- calls ----------
+  async function ensureMic(){
+    if (localStream) return localStream;
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: false });
+    muted = false; applyMute();
+    return localStream;
+  }
+  function releaseMic(){
+    if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+    muted = false; applyMute();
+  }
+  function applyMute(){
+    if (localStream) localStream.getAudioTracks().forEach(t => { t.enabled = !muted; });
+    $('muteBtn').classList.toggle('active', muted); $('muteBtn').setAttribute('aria-pressed', String(muted));
+    $('muteSlash').hidden = !muted; $('muteLbl').textContent = muted ? 'باصدا' : 'بی‌صدا';
+  }
+  $('muteBtn').addEventListener('click', () => { muted = !muted; applyMute(); });
+  $('vol').addEventListener('input', e => { vol = parseFloat(e.target.value); audios.forEach(a => { a.volume = vol; }); });
+
+  async function startCall(){
+    unlockAudio();
+    if (call || incoming) { toast('در حال حاضر تماسی فعال است'); return; }
+    if (!Object.keys(roster).length) { toast('هنوز عضو دیگری در گروه نیست'); return; }
+    if (!me || !me.id || me.disconnected) { toast('به سرور وصل نیستید'); return; }
+    try { await ensureMic(); } catch (e) { toast('دسترسی به میکروفون داده نشد'); return; }
+    if (call || incoming) { releaseMic(); return; }
+    const cid = uid + '.' + Date.now().toString(36);
+    call = { cid, dir: 'out', starter: uid, starterName: myName, ts: Date.now(), joined: new Set([uid]), ringing: new Set(), declined: new Set(), state: 'ringing', startAt: 0, ringOpen: true, timer: null };
+    const offline = [];
+    Object.keys(roster).forEach(u => {
+      if (sendTo(u, { t: 'ring', cid, fromName: myName, ts: call.ts })) call.ringing.add(u); else offline.push(u);
+    });
+    if (offline.length) {
+      const e = { cid, from: uid, fromName: myName, ts: call.ts, to: offline };
+      outbox.push(e); saveOutbox();
+      broadcast({ t: 'missedRelay', e });
+    }
+    logUpsert({ id: cid, dir: 'out', who: roomName, ts: call.ts, status: 'noanswer' });
+    startRing('back');
+    call.timer = setTimeout(ringTimeout, RING_MS);
+    startCallUI(); renderMembers(); renderCall();
+  }
+  function ringTimeout(){
+    if (!call) return;
+    call.ringOpen = false;
+    if (call.state === 'ringing') { endCall('noanswer'); return; }
+    broadcast({ t: 'ringend', cid: call.cid }); call.ringing.clear(); renderCall();
+  }
+  function becomeActive(){
+    if (!call || call.state === 'active') return;
+    call.state = 'active'; call.startAt = Date.now(); stopRing(); beep(880, 0.12);
+    logUpsert({ id: call.cid, dir: call.dir, status: 'answered' });
+    renderCall();
+  }
+  function startCallUI(){
+    clearInterval(tickTimer); clearInterval(levelTimer);
+    tickTimer = setInterval(renderStatus, 1000);
+    levelTimer = setInterval(levelTick, 150);
+    if (localStream) watch(uid, localStream);
+    try { if ('wakeLock' in navigator) navigator.wakeLock.request('screen').then(w => { wakeLock = w; }).catch(() => {}); } catch (e) {}
+  }
+  function onRing(rec, m){
+    const cid = String(m.cid || ''); if (!cid) return;
+    const u = rec.uid; const who = clean(m.fromName) || nameOf(u);
+    if (call && call.cid === cid) return;
+    if (incoming && incoming.cid === cid) return;
+    if (logArr.some(x => x.id === cid && x.dir === 'in' && x.status !== 'missed')) return;
+    if (call) {
+      // هر دو هم‌زمان زنگ زده‌اند: cid کوچک‌تر برنده است
+      if (call.dir === 'out' && call.state === 'ringing' && call.joined.size === 1 && cid < call.cid) endCall('cancelled', true);
+      else { sendTo(u, { t: 'busy', cid }); return; }
+    }
+    if (incoming) { sendTo(u, { t: 'busy', cid }); return; }
+    if ($('dnd').checked) {
+      sendTo(u, { t: 'busy', cid });
+      logUpsert({ id: cid, dir: 'in', who, ts: +m.ts || Date.now(), status: 'missed' });
+      return;
+    }
+    incoming = { cid, from: u, fromName: who, ts: +m.ts || Date.now(), timer: setTimeout(() => missIncoming('timeout'), RING_MS + 3000) };
+    startRing('in'); startBlink('📞 تماس از ' + who);
+    notif = notify('📞 تماس گروهی از ' + who, 'گروه «' + roomName + '» — برای پاسخ‌دادن صفحه را باز کنید', 'call-' + cid, true);
+    renderMembers(); renderCall();
+  }
+  function clearIncoming(){
+    if (!incoming) return;
+    clearTimeout(incoming.timer); incoming = null;
+    stopRing(); stopBlink();
+    try { notif && notif.close(); } catch (e) {} notif = null;
+  }
+  function missIncoming(why){
+    if (!incoming) return;
+    const inc = incoming; clearIncoming();
+    logUpsert({ id: inc.cid, dir: 'in', who: inc.fromName, ts: inc.ts, status: 'missed' });
+    notify('📵 تماس از دست رفته', 'از ' + inc.fromName, 'missed-' + inc.cid, false);
+    if (why !== 'timeout') toast('📵 تماس از دست رفته از ' + inc.fromName);
+    renderMembers(); renderCall();
+  }
+  function declineIncoming(){
+    if (!incoming) return;
+    const inc = incoming; clearIncoming();
+    sendTo(inc.from, { t: 'decline', cid: inc.cid });
+    logUpsert({ id: inc.cid, dir: 'in', who: inc.fromName, ts: inc.ts, status: 'declined' });
+    renderMembers(); renderCall();
+  }
+  async function acceptIncoming(){
+    if (!incoming) return;
+    unlockAudio();
+    const inc = incoming;
+    try { await ensureMic(); } catch (e) { toast('دسترسی به میکروفون داده نشد'); declineIncoming(); return; }
+    if (incoming !== inc) { if (!call) releaseMic(); return; }  // در این فاصله لغو شد
+    clearIncoming();
+    call = { cid: inc.cid, dir: 'in', starter: inc.from, starterName: inc.fromName, ts: inc.ts, joined: new Set([uid, inc.from]), ringing: new Set(), declined: new Set(), state: 'active', startAt: Date.now(), ringOpen: false, timer: null };
+    logUpsert({ id: inc.cid, dir: 'in', who: inc.fromName, ts: inc.ts, status: 'answered' });
+    broadcast({ t: 'joined', cid: inc.cid });
+    startCallUI(); renderMembers(); renderCall();
+  }
+  function checkEnd(){ if (call && call.state === 'active' && call.joined.size <= 1) endCall('ended'); }
+  function endCall(reason, silent){
+    if (!call) return;
+    const c = call; call = null;
+    clearTimeout(c.timer); clearInterval(tickTimer); clearInterval(levelTimer); stopRing();
+    if (c.state === 'ringing' && c.dir === 'out') {
+      broadcast({ t: 'cancel', cid: c.cid });
+      logUpsert({ id: c.cid, dir: 'out', status: 'noanswer' });
+    } else {
+      broadcast({ t: 'left', cid: c.cid });
+      if (c.startAt) logUpsert({ id: c.cid, dir: c.dir, status: 'answered', dur: Math.round((Date.now() - c.startAt) / 1000) });
+    }
+    [...mc.keys()].forEach(closeMedia);
+    levels.forEach(o => { try { o.src.disconnect(); } catch (e) {} }); levels.clear();
+    connected.clear();
+    releaseMic();
+    try { wakeLock && wakeLock.release(); } catch (e) {} wakeLock = null;
+    if (!silent) beep(520, 0.25);
+    if (!silent && reason === 'noanswer') toast('بی‌پاسخ ماند');
+    renderMembers(); renderCall();
+  }
+
+  // media (mesh)
+  function callMedia(u){
+    if (!call || !me || !localStream || mc.has(u) || u === uid) return;
+    try {
+      const c = me.call(pid(u), localStream, { metadata: { cid: call.cid } });
+      mc.set(u, { call: c, out: true }); bindMedia(u, c);
+    } catch (e) {}
+  }
+  function bindMedia(u, c){
+    c.on('stream', s => attachRemote(u, s));
+    const gone_ = () => {
+      const m = mc.get(u);
+      if (m && m.call === c) {
+        mc.delete(u); detachRemote(u);
+        if (call) { call.joined.delete(u); renderCall(); checkEnd(); }
+      }
+    };
+    c.on('close', gone_); c.on('error', gone_);
+    setTimeout(() => { if (call && mc.get(u) && mc.get(u).call === c && !connected.has(u)) toast('اتصال صدا با ' + nameOf(u) + ' برقرار نشد (شاید نیاز به سرور TURN باشد)'); }, 20000);
+  }
+  function onMediaCall(c){
+    const u = uidOf(c.peer), cid = c.metadata && c.metadata.cid;
+    if (!call || !localStream || !isUid(u) || call.cid !== cid) { try { c.close(); } catch (e) {} return; }
+    const ex = mc.get(u);
+    if (ex) {
+      if (ex.out && uid < u) { try { c.close(); } catch (e) {} return; }
+      mc.delete(u); detachRemote(u); try { ex.call.close(); } catch (e) {}
+    }
+    mc.set(u, { call: c, out: false });
+    call.joined.add(u); call.ringing.delete(u);
+    if (call.state === 'ringing') becomeActive();
+    c.answer(localStream); bindMedia(u, c); renderCall();
+  }
+  function closeMedia(u){
+    const m = mc.get(u); if (!m) return;
+    mc.delete(u); detachRemote(u); try { m.call.close(); } catch (e) {}
+  }
+  function attachRemote(u, s){
+    let a = audios.get(u);
+    if (!a) { a = document.createElement('audio'); a.autoplay = true; a.setAttribute('playsinline', ''); document.body.appendChild(a); audios.set(u, a); }
+    a.srcObject = s; a.volume = vol;
+    const p = a.play(); if (p && p.catch) p.catch(() => {});
+    watch(u, s); connected.add(u); renderCall();
+  }
+  function detachRemote(u){
+    const a = audios.get(u); if (a) { a.srcObject = null; a.remove(); audios.delete(u); }
+    const l = levels.get(u); if (l) { try { l.src.disconnect(); } catch (e) {} levels.delete(u); }
+    connected.delete(u);
+  }
+  function watch(u, s){
+    if (!actx) return;
+    try {
+      const old = levels.get(u); if (old) { try { old.src.disconnect(); } catch (e) {} }
+      const src = actx.createMediaStreamSource(s); const an = actx.createAnalyser(); an.fftSize = 256;
+      src.connect(an); levels.set(u, { an, src, buf: new Uint8Array(256) });
+    } catch (e) {}
+  }
+  function levelTick(){
+    levels.forEach((o, u) => {
+      o.an.getByteTimeDomainData(o.buf);
+      let s = 0; for (let i = 0; i < o.buf.length; i++) { const x = (o.buf[i] - 128) / 128; s += x * x; }
+      const lvl = Math.sqrt(s / o.buf.length);
+      const el = document.querySelector('.tile[data-u="' + u + '"]');
+      if (el) el.classList.toggle('speaking', lvl > 0.04 && !(u === uid && muted));
+    });
+  }
+
+  // ---------- call screen ----------
+  function renderStatus(){
+    if (!call) return;
+    $('csStatus').textContent = call.state === 'active' ? fmtDur(Math.floor((Date.now() - call.startAt) / 1000)) : 'در حال زنگ زدن…';
+  }
+  function renderCall(){
+    const cs = $('callScreen'), tiles = $('csTiles');
+    if (!incoming && !call) { cs.hidden = true; tiles.innerHTML = ''; return; }
+    cs.hidden = false;
+    if (incoming) {
+      cs.dataset.mode = 'incoming';
+      $('csAvatar').textContent = (incoming.fromName || '؟').trim().charAt(0);
+      $('csName').textContent = incoming.fromName;
+      $('csSub').textContent = 'تماس صوتی گروه «' + roomName + '»';
+      $('csStatus').textContent = 'در حال زنگ خوردن…';
+      $('inCtl').hidden = false; $('actCtl').hidden = true; $('csVolWrap').hidden = true;
+      tiles.innerHTML = ''; return;
+    }
+    cs.dataset.mode = call.state === 'active' ? 'active' : 'calling';
+    $('csAvatar').textContent = (roomName || '؟').trim().charAt(0);
+    $('csName').textContent = roomName;
+    $('csSub').textContent = 'تماس صوتی گروهی';
+    renderStatus();
+    $('inCtl').hidden = true; $('actCtl').hidden = false; $('csVolWrap').hidden = false;
+    tiles.innerHTML = '';
+    const ids = [uid, ...Object.keys(roster)];
+    ids.forEach(u => {
+      let cls = 'tile', st;
+      if (u === uid) st = 'شما';
+      else if (call.joined.has(u)) st = connected.has(u) ? 'متصل' : 'در حال اتصال…';
+      else if (call.ringing.has(u)) { st = 'در حال زنگ…'; cls += ' ringing'; }
+      else if (call.declined.has(u)) { st = 'رد کرد'; cls += ' off'; }
+      else if (isOnline(u)) { st = 'آنلاین'; cls += ' off'; }
+      else { st = 'در دسترس نیست'; cls += ' off'; }
+      const t = document.createElement('div'); t.className = cls; t.dataset.u = u;
+      const av = document.createElement('div'); av.className = 'av'; av.textContent = nameOf(u).trim().charAt(0) || '؟';
+      const b = document.createElement('b'); b.textContent = nameOf(u);
+      const s = document.createElement('small'); s.textContent = st;
+      t.append(av, b, s); tiles.append(t);
+    });
+  }
+  $('acceptBtn').addEventListener('click', acceptIncoming);
+  $('declineBtn').addEventListener('click', declineIncoming);
+  $('hangBtn').addEventListener('click', () => endCall('ended'));
+  $('callBtn').addEventListener('click', startCall);
+
+  // ---------- join / lifecycle ----------
+  async function enter(name, room, pass){
+    myName = name; roomName = room; roomPass = pass;
+    roomKey = await roomToKey(room, pass);
+    dirId = PREFIX + roomKey + '-dir';
+    loadRoom();
+    initAudio();
+    $('joinCard').hidden = true; $('closedCard').hidden = true; $('app').hidden = false;
+    $('gName').textContent = roomName;
+    chatLog.innerHTML = EMPTY_HTML;
+    renderLog(); renderMembers(); updateMissedBanner(); updateNotifBanner(); updateAudioBanner();
+    try { history.replaceState(null, '', '#' + encodeURIComponent(roomName)); } catch (e) {}
+    setConn('', 'در حال اتصال…');
+    leaving = false; peerTries = 0;
+    createPeer();
+    clearInterval(retryTimer);
+    retryTimer = setInterval(() => {
+      if (leaving || !me || !me.id || me.disconnected) return;
+      connectAll();
+      if (!dirConn && !claiming && !joining) claimDirectory();
+      outbox = outbox.filter(e => Date.now() - e.ts < 7 * 864e5); saveOutbox();
+    }, 12000);
+  }
+  function teardown(){
+    leaving = true; clearInterval(retryTimer);
+    try { if (call) endCall('ended', true); if (incoming) clearIncoming(); } catch (e) {}
+    conns.forEach(r => { try { r.conn && r.conn.close(); } catch (e) {} }); conns.clear();
+    try { dirConn && dirConn.close(); } catch (e) {}
+    try { dirPeer && dirPeer.destroy(); } catch (e) {}
+    try { me && me.destroy(); } catch (e) {}
+    releaseMic(); stopBlink();
+  }
+  $('joinBtn').addEventListener('click', () => {
+    const err = $('err'); err.textContent = '';
+    const name = $('name').value.trim().slice(0, 20) || ('کاربر ' + Math.floor(Math.random() * 900 + 100));
+    const room = $('room').value.trim(); const pass = $('pass').value;
+    if (!room) { err.textContent = 'نام گروه را وارد کنید.'; return; }
+    if (typeof Peer === 'undefined') { err.textContent = 'کتابخانه PeerJS بارگذاری نشد. اینترنت یا فیلترشکن را بررسی کنید.'; return; }
+    if (!window.isSecureContext) { err.textContent = 'تماس صوتی فقط روی HTTPS کار می‌کند.'; return; }
+    LS.set(PREFIX + 'session', { name, room, pass });
+    initAudio(); unlockAudio(); askNotif();
+    enter(name, room, pass);
+  });
+  [$('name'), $('room'), $('pass')].forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') $('joinBtn').click(); }));
+
+  $('copyBtn').addEventListener('click', async () => {
+    const url = location.href.split('#')[0] + '#' + encodeURIComponent(roomName);
+    try { await navigator.clipboard.writeText(url); toast('لینک کپی شد' + (roomPass ? ' (رمز گروه را جداگانه بدهید)' : '')); }
+    catch (e) { prompt('لینک گروه:', url); }
+  });
+  // خروج معمولی: فقط صفحه بسته می‌شود، عضویت می‌ماند
+  $('exitBtn').addEventListener('click', () => {
+    teardown();
+    $('app').hidden = true; $('closedCard').hidden = false; setConn('', 'آفلاین');
+    $('audioBanner').hidden = true; $('notifBanner').hidden = true; $('missedBanner').hidden = true;
+    try { window.close(); } catch (e) {}
+  });
+  $('reopenBtn').addEventListener('click', () => location.reload());
+  // ترک گروه: حذف دائمی عضویت
+  $('leaveBtn').addEventListener('click', () => { $('modal').hidden = false; });
+  $('modalNo').addEventListener('click', () => { $('modal').hidden = true; });
+  $('modalYes').addEventListener('click', () => {
+    broadcast({ t: 'bye' });
+    const keys = ['roster', 'gone', 'log', 'outbox', 'dnd'].map(k);
+    setTimeout(() => {
+      teardown();
+      keys.forEach(LS.del); LS.del(PREFIX + 'session');
+      try { history.replaceState(null, '', location.pathname); } catch (e) {}
+      location.reload();
+    }, 350);
+  });
+  $('dnd').addEventListener('change', e => LS.set(k('dnd'), e.target.checked));
+
+  window.addEventListener('beforeunload', e => {
+    if (call || incoming) { e.preventDefault(); e.returnValue = ''; }
+  });
+  window.addEventListener('pagehide', () => { try { if (call) endCall('ended', true); } catch (e) {} });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') { unlockAudio(); if (incoming) stopBlink(); updateNotifBanner(); }
+  });
+
+  // ---------- init ----------
+  const sess = LS.get(PREFIX + 'session', null);
+  if (sess && sess.room) {
+    $('name').value = sess.name || ''; $('room').value = sess.room;
+    enter(sess.name || 'کاربر', sess.room, sess.pass || '');
+  } else {
+    $('joinCard').hidden = false;
+    $('name').value = LS.get(PREFIX + 'lastname', '') || '';
+    const h = decodeURIComponent(location.hash.replace(/^#/, ''));
+    if (h) $('room').value = h;
+    $('joinBtn').addEventListener('click', () => LS.set(PREFIX + 'lastname', $('name').value.trim()));
+  }
+})();
+</script>
+</body>
+</html>
