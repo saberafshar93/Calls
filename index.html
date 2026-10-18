@@ -1002,6 +1002,7 @@
     clearInterval(tickTimer); clearInterval(levelTimer);
     tickTimer = setInterval(renderStatus, 1000);
     clearInterval(routeTimer); routeTimer = setInterval(() => { if (call) applyRoute(); }, 2500);
+    try { if (window.median && median.android && median.android.audio) median.android.audio.requestFocus(true); } catch (e) {}   // Median: audio focus
     levelTimer = setInterval(levelTick, 150);
     if (localStream) watch(uid, localStream);
     try { if ('wakeLock' in navigator) navigator.wakeLock.request('screen').then(w => { wakeLock = w; }).catch(() => {}); } catch (e) {}
@@ -1079,6 +1080,7 @@
     connected.clear();
     muted = false; syncMic();          // میکروفون باز می‌ماند ولی غیرفعال است
     speakerOn = false; renderSpk(); audioSessionType('playback'); nativeRoute(false);
+    try { if (window.median && median.android && median.android.audio) median.android.audio.requestFocus(false); } catch (e) {}
     try { wakeLock && wakeLock.release(); } catch (e) {} wakeLock = null;
     if (!silent) beep(520, 0.25);
     if (!silent && reason === 'noanswer') toast('بی‌پاسخ ماند');
