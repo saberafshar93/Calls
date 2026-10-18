@@ -63,6 +63,7 @@
   .grp.sel{border-color:var(--amber); box-shadow:0 0 0 2px color-mix(in srgb,var(--amber) 30%,transparent)}
   .grp .g1{min-width:0; display:flex; flex-direction:column}
   .grp b{font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .grp .left{color:var(--danger); font-weight:800; margin-inline-start:6px}
   .grp small{color:var(--muted); font-size:.78rem}
   .grp .g2{flex:none; font-size:.78rem; color:var(--muted); display:flex; align-items:center; gap:6px}
   #pickHint{font-size:.85rem; color:var(--amber); margin:0 0 12px}
@@ -91,6 +92,8 @@
   .chip .dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
   .chip.on .dot{background:var(--live)} .chip.on{border-color:color-mix(in srgb,var(--live) 55%,var(--line))}
   .chip.self{border-style:dashed}
+  .chip .hosttag{color:var(--amber)}
+  .hosttag{color:var(--amber); font-size:.75rem; font-weight:800}
   #hint{font-size:.85rem; color:var(--muted); margin:10px 0 0}
 
   #log{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; max-height:230px; overflow-y:auto}
@@ -124,7 +127,9 @@
 
   .actions{display:flex; gap:10px}
   .actions .ghost{flex:1}
-  .leave-wrap{margin-top:4px; padding-top:14px; border-top:1px dashed var(--line); display:flex; flex-direction:column; gap:6px}
+  .leave-wrap{margin-top:4px; padding-top:14px; border-top:1px dashed var(--line); display:flex; flex-direction:column; gap:8px}
+  .leave-wrap .row{display:flex; gap:10px}
+  .leave-wrap .row .ghost{flex:1}
   .leave-wrap small{color:var(--muted); font-size:.78rem; text-align:center}
 
   /* ====== call screen (iPhone-like) ====== */
@@ -197,7 +202,7 @@
       <ul id="groupList"></ul>
     </div>
 
-    <p class="note">میکروفون فقط یک‌بار هنگام ورود پرسیده می‌شود. عضویت شما در گروه‌ها روی همین دستگاه ذخیره می‌شود و فقط دکمه‌ی «ترک گروه» آن را پاک می‌کند.</p>
+    <p class="note">میکروفون فقط یک‌بار هنگام ورود پرسیده می‌شود. عضویت شما در گروه‌ها روی همین دستگاه ذخیره می‌شود. با «ترک گروه»، گروه با برچسب «ترک شده» در لیست می‌ماند و اگر گروه هنوز باقی باشد می‌توانید دوباره وارد شوید.</p>
   </section>
 
   <!-- اپ -->
@@ -246,11 +251,14 @@
 
     <div class="actions">
       <button class="ghost" id="copyBtn">کپی لینک گروه</button>
-      <button class="ghost" id="exitBtn">خروج (بستن صفحه)</button>
+      <button class="ghost" id="exitBtn">بازگشت به صفحه نخست</button>
     </div>
     <div class="leave-wrap">
-      <button class="ghost danger" id="leaveBtn">ترک گروه</button>
-      <small>«خروج» فقط صفحه را می‌بندد و عضو می‌مانید. «ترک گروه» عضویت شما را پاک می‌کند (تماس‌ها و پیام‌ها حفظ می‌شوند مگر همه‌ی اعضا رفته باشند).</small>
+      <div class="row">
+        <button class="ghost danger" id="leaveBtn">ترک گروه</button>
+        <button class="ghost danger" id="delBtn" hidden>حذف گروه</button>
+      </div>
+      <small>«بازگشت به صفحه نخست» فقط شما را به لیست گروه‌ها می‌برد و عضو می‌مانید. «ترک گروه» عضویت شما را پاک می‌کند ولی گروه با برچسب «ترک شده» در لیست می‌ماند. «حذف گروه» (فقط میزبان) گروه را برای همه حذف می‌کند.</small>
     </div>
   </section>
 </main>
@@ -280,8 +288,8 @@
 
 <div id="modal" hidden>
   <div class="box">
-    <p><b>ترک گروه؟</b><br>عضویت شما پاک می‌شود و دیگر تماس‌های این گروه را دریافت نخواهید کرد. اگر بعداً با همین نام و رمز وارد شوید، تماس‌ها و پیام‌های قبلی را می‌بینید.</p>
-    <div class="actions"><button class="ghost danger" id="modalYes">بله، ترک کن</button><button class="ghost" id="modalNo">انصراف</button></div>
+    <p id="modalText"></p>
+    <div class="actions"><button class="ghost danger" id="modalYes">بله</button><button class="ghost" id="modalNo">انصراف</button></div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -322,6 +330,8 @@
   let me = null, dirPeer = null, dirConn = null;
   let leaving = false, claiming = false, joining = false, dirStarted = false, peerTries = 0;
   let roster = {}, gone = {}, logArr = [], outbox = [];
+  let host = null;                       // {u, n, ts} میزبان = اولین نفری که گروه را ساخته
+  let modalMode = 'leave';
   let chatArr = [], chatFloor = 0, chatSaveT = null, msgSeq = 0;
   const conns = new Map();
   const pending = new Set();
@@ -330,7 +340,7 @@
   let localStream = null, micP = null, muted = false, vol = 1, wakeLock = null;
   let speakerOn = false;
   const mc = new Map();
-  const audios = new Map(), levels = new Map(), connected = new Set();
+  const audios = new Map(), levels = new Map(), connected = new Set(), loops = new Map();
   let actx = null, tickTimer = null, levelTimer = null, blinkTimer = null, retryTimer = null, beatTimer = null;
   let ringTimer = null;
   let notif = null;
@@ -344,6 +354,7 @@
   const isUid = s => typeof s === 'string' && /^[0-9a-f]{16}$/.test(s);
   const isOnline = u => { const r = conns.get(u); return !!(r && r.conn && r.conn.open); };
   const nameOf = u => u === uid ? myName : ((roster[u] && roster[u].name) || (conns.get(u) && conns.get(u).name) || 'ناشناس');
+  const isHost = () => !!(host && host.u === uid);
 
   // ---------- helpers ----------
   function toast(msg){
@@ -411,9 +422,18 @@
   function beep(f, d){ if (actx) try { tone(f, actx.currentTime + 0.01, d, 0.2, 'sine', false); } catch (e) {} }
 
   // ---------- مسیر صدا: گوشی (earpiece) / بلندگو ----------
-  // وب مستقیم به مسیر صدا دسترسی ندارد؛ این‌جا «بهترین تلاش» انجام می‌شود:
-  //  • iOS Safari 16.4+: navigator.audioSession  (play-and-record = حالت تماس/گوشی)
-  //  • مرورگرهایی که setSinkId و خروجی‌های صوتی را می‌دهند: انتخاب بلندگو/گوشی
+  // در تماس، پیش‌فرض صدا از «گوشی» (مثل برنامه‌ی تماس) پخش می‌شود و دکمه‌ی «بلندگو» آن را به بلندگو می‌برد.
+  // لایه‌های تلاش (به ترتیب):
+  //  1) پل بومی (برای اپ اندروید/iOS): window.WTNative.setSpeaker(bool) یا رویداد 'wt-audio-route'
+  //  2) iOS/WebView: navigator.audioSession.type = 'play-and-record' (حالت تماس) / 'playback' (بلندگو)
+  //  3) setSinkId (اگر مرورگر خروجی earpiece را بدهد)
+  //  4) «حلقه‌ی WebRTC محلی»: صدای طرف مقابل از یک اتصال داخلی رد می‌شود تا سیستم آن را «صدای تماس» حساب کند
+  //     (در اندروید و iOS صدای تماس به‌جای بلندگوی مدیا از گوشی پخش می‌شود)
+  const HAS_NATIVE = !!(window.WTNative && typeof window.WTNative.setSpeaker === 'function');
+  function nativeRoute(sp){
+    try { if (HAS_NATIVE) window.WTNative.setSpeaker(!!sp); } catch (e) {}
+    try { window.dispatchEvent(new CustomEvent('wt-audio-route', { detail: { speaker: !!sp, inCall: !!call } })); } catch (e) {}
+  }
   function audioSessionType(t){
     if (!IS_MOBILE) return;
     try { if ('audioSession' in navigator) navigator.audioSession.type = t; } catch (e) {}
@@ -427,11 +447,27 @@
       if (d) await a.setSinkId(d.deviceId);
     } catch (e) {}
   }
+  // صدای دریافتی را از یک اتصال WebRTC محلی عبور می‌دهد (تا مسیر «صدای تماس» فعال شود)
+  async function makeLoop(stream){
+    const a = new RTCPeerConnection(), b = new RTCPeerConnection();
+    const kill = () => { try { a.close(); } catch (e) {} try { b.close(); } catch (e) {} };
+    try {
+      a.onicecandidate = e => { if (e.candidate) b.addIceCandidate(e.candidate).catch(() => {}); };
+      b.onicecandidate = e => { if (e.candidate) a.addIceCandidate(e.candidate).catch(() => {}); };
+      const out = new Promise(r => { b.ontrack = e => r(e.streams[0] || new MediaStream([e.track])); });
+      stream.getAudioTracks().forEach(t => a.addTrack(t, stream));
+      const o = await a.createOffer(); await a.setLocalDescription(o); await b.setRemoteDescription(o);
+      const an = await b.createAnswer(); await b.setLocalDescription(an); await a.setRemoteDescription(an);
+      const s = await Promise.race([out, new Promise((_, j) => setTimeout(j, 4000))]);
+      return { s, kill };
+    } catch (e) { kill(); throw e; }
+  }
   function applyRoute(){
+    nativeRoute(speakerOn);
     if (!IS_MOBILE) return;
-    audioSessionType(speakerOn ? 'playback' : 'play-and-record');
+    audioSessionType(call ? (speakerOn ? 'playback' : 'play-and-record') : 'playback');
     audios.forEach(a => setSink(a, speakerOn));
-    if (speakerOn) setTimeout(() => {   // اگر سیستم با حالت بلندگو میکروفون را قطع کرد، برگرد
+    if (speakerOn && !HAS_NATIVE) setTimeout(() => {   // اگر سیستم با حالت بلندگو میکروفون را قطع کرد، برگرد
       const t = localStream && localStream.getAudioTracks()[0];
       if (speakerOn && call && t && t.muted) { speakerOn = false; applyRoute(); renderSpk(); toast('این دستگاه اجازه‌ی تغییر به بلندگو را نداد'); }
     }, 900);
@@ -474,6 +510,8 @@
     outbox = (LS.get(k('outbox'), []) || []).filter(e => e && Date.now() - e.ts < 7 * 864e5);
     chatArr = (LS.get(k('chat'), []) || []).map(cleanMsg).filter(Boolean).slice(-MAX_CHAT);
     chatFloor = +LS.get(k('floor'), 0) || 0;
+    const h = LS.get(k('host'), null);
+    host = (h && isUid(h.u) && +h.ts > 0) ? { u: h.u, n: clean(h.n) || 'ناشناس', ts: +h.ts } : null;
     delete roster[uid];
     $('dnd').checked = !!LS.get(k('dnd'), false);
     $('clrExit').checked = !!LS.get(k('clrexit'), false);
@@ -483,19 +521,25 @@
     if (setFloor) { chatFloor = Date.now(); LS.set(k('floor'), chatFloor); }
   }
   function wipeRoomAll(){
-    ['roster', 'gone', 'log', 'outbox', 'chat', 'floor', 'dnd', 'clrexit'].forEach(n => LS.del(k(n)));
+    ['roster', 'gone', 'log', 'outbox', 'chat', 'floor', 'dnd', 'clrexit', 'host'].forEach(n => LS.del(k(n)));
   }
   function exitChatPolicy(){ if ($('clrExit').checked) wipeChatLocal(true); }
   $('clrExit').addEventListener('change', e => LS.set(k('clrexit'), e.target.checked));
+
+  // ---------- host (میزبان) ----------
+  function setHost(h){
+    host = h; LS.set(k('host'), h); saveGroup(); renderMembers();
+  }
 
   // ---------- saved groups (home) ----------
   const getGroups = () => { const a = LS.get(PREFIX + 'groups', []); return Array.isArray(a) ? a.filter(g => g && g.key && g.room) : []; };
   function saveGroup(){
     const a = getGroups().filter(g => g.key !== roomKey);
-    a.push({ key: roomKey, room: roomName, name: myName, hasPass: !!roomPass, last: Date.now() });
+    a.push({ key: roomKey, room: roomName, name: myName, hasPass: !!roomPass, last: Date.now(), hostName: host ? host.n : '', left: false });
     LS.set(PREFIX + 'groups', a);
   }
-  function forgetGroup(key){ LS.set(PREFIX + 'groups', getGroups().filter(g => g.key !== key)); }
+  function removeGroup(key){ LS.set(PREFIX + 'groups', getGroups().filter(g => g.key !== key)); }
+  function markLeft(key){ LS.set(PREFIX + 'groups', getGroups().map(g => g.key === key ? Object.assign({}, g, { left: true, last: Date.now() }) : g)); }
   function renderGroups(){
     const a = getGroups().sort((x, y) => (y.last || 0) - (x.last || 0));
     $('groupsBox').hidden = a.length === 0;
@@ -505,7 +549,8 @@
       const b = document.createElement('button'); b.type = 'button';
       b.className = 'grp' + (selectedGroup && selectedGroup.key === g.key ? ' sel' : '');
       const g1 = document.createElement('span'); g1.className = 'g1';
-      const t = document.createElement('b'); t.textContent = g.room;
+      const t = document.createElement('b'); t.textContent = g.room + (g.hostName ? ' (' + g.hostName + ')' : '');
+      if (g.left) { const l = document.createElement('span'); l.className = 'left'; l.textContent = '(ترک شده)'; t.append(l); }
       const s = document.createElement('small'); s.textContent = 'نام شما: ' + g.name;
       g1.append(t, s);
       const g2 = document.createElement('span'); g2.className = 'g2';
@@ -567,20 +612,31 @@
   // ---------- members UI ----------
   function renderMembers(){
     const ul = $('members'); ul.innerHTML = '';
-    const add = (name, on, self) => {
+    const add = (u, name, on, self) => {
       const li = document.createElement('li'); li.className = 'chip' + (on ? ' on' : '') + (self ? ' self' : '');
       const d = document.createElement('span'); d.className = 'dot';
       const t = document.createElement('span'); t.textContent = name + (self ? ' (شما)' : '');
-      li.append(d, t); ul.append(li);
+      li.append(d, t);
+      if (host && host.u === u) { const h = document.createElement('span'); h.className = 'hosttag'; h.textContent = '👑 میزبان'; li.append(h); }
+      ul.append(li);
     };
-    add(myName, true, true);
+    add(uid, myName, true, true);
     const ids = Object.keys(roster);
-    ids.forEach(u => add(nameOf(u), isOnline(u), false));
+    ids.forEach(u => add(u, nameOf(u), isOnline(u), false));
+    // اگر میزبان ترک کرده و در لیست نیست، باز هم نامش نشان داده شود
+    if (host && host.u !== uid && !(host.u in roster)) {
+      const li = document.createElement('li'); li.className = 'chip';
+      const d = document.createElement('span'); d.className = 'dot';
+      const t = document.createElement('span'); t.textContent = host.n;
+      const h = document.createElement('span'); h.className = 'hosttag'; h.textContent = '👑 میزبان (ترک شده)';
+      li.append(d, t, h); ul.append(li);
+    }
     const on = ids.filter(isOnline).length;
     $('onlineCount').textContent = on + 1;
     $('totalCount').textContent = ids.length + 1;
     $('hint').hidden = ids.length > 0;
     $('callBtn').disabled = !!(call || incoming);
+    $('delBtn').hidden = !isHost();
   }
 
   // ---------- chat (پایدار + همگام‌سازی بین اعضا) ----------
@@ -702,7 +758,7 @@
   function sendHi(conn){
     const list = Object.entries(roster).slice(0, 60).map(([u, r]) => ({ u, n: r.name }));
     list.push({ u: uid, n: myName });
-    try { conn.send({ t: 'hi', name: myName, roster: list, gone: Object.entries(gone).slice(0, 60) }); } catch (e) {}
+    try { conn.send({ t: 'hi', name: myName, roster: list, gone: Object.entries(gone).slice(0, 60), host }); } catch (e) {}
   }
   function drop(u, conn){
     const rec = conns.get(u);
@@ -768,6 +824,12 @@
         rec.name = clean(m.name) || 'ناشناس';
         delete gone[u];
         roster[u] = { name: rec.name, at: Date.now() };
+        // میزبان = قدیمی‌ترین ادعا (کوچک‌ترین زمان ساخت)
+        if (m.host && isUid(m.host.u) && +m.host.ts > 0) {
+          const h = { u: m.host.u, n: clean(m.host.n) || 'ناشناس', ts: +m.host.ts };
+          if (h.u === u) h.n = rec.name;
+          if (!host || h.ts < host.ts || (h.u === host.u && h.n !== host.n)) setHost(h);
+        }
         (Array.isArray(m.roster) ? m.roster.slice(0, 60) : []).forEach(x => {
           if (!x || !isUid(x.u) || x.u === uid || (x.u in gone)) return;
           if (!roster[x.u]) roster[x.u] = { name: clean(x.n) || 'ناشناس' };
@@ -804,6 +866,13 @@
         toast(nameOf(u) + ' گروه را ترک کرد');
         const r = conns.get(u); if (r) { conns.delete(u); try { r.conn.close(); } catch (e) {} }
         renderMembers(); break;
+      }
+      case 'destroy': {
+        // فقط میزبان می‌تواند گروه را برای همه حذف کند
+        if (!host || host.u !== u) return;
+        SS.set(PREFIX + 'notice', 'گروه «' + roomName + '» توسط میزبان حذف شد');
+        wipeRoomAll(); removeGroup(roomKey); teardown(); backHome();
+        break;
       }
       case 'ring': onRing(rec, m); break;
       case 'cancel': case 'ringend':
@@ -1002,7 +1071,7 @@
     levels.forEach(o => { try { o.src.disconnect(); } catch (e) {} }); levels.clear();
     connected.clear();
     muted = false; syncMic();          // میکروفون باز می‌ماند ولی غیرفعال است
-    speakerOn = false; renderSpk(); audioSessionType('playback');
+    speakerOn = false; renderSpk(); audioSessionType('playback'); nativeRoute(false);
     try { wakeLock && wakeLock.release(); } catch (e) {} wakeLock = null;
     if (!silent) beep(520, 0.25);
     if (!silent && reason === 'noanswer') toast('بی‌پاسخ ماند');
@@ -1053,9 +1122,20 @@
     setSink(a, speakerOn);
     const p = a.play(); if (p && p.catch) p.catch(() => {});
     watch(u, s); connected.add(u); renderCall();
+    // موبایل: صدا را از حلقه‌ی WebRTC محلی رد کن تا مثل «صدای تماس» از گوشی پخش شود
+    if (IS_MOBILE && !HAS_NATIVE && typeof RTCPeerConnection !== 'undefined') {
+      const old = loops.get(u); if (old) { try { old.kill(); } catch (e) {} loops.delete(u); }
+      makeLoop(s).then(l => {
+        if (audios.get(u) !== a || !call) { l.kill(); return; }
+        loops.set(u, l); a.srcObject = l.s;
+        const q = a.play(); if (q && q.catch) q.catch(() => {});
+      }).catch(() => {});   // اگر نشد، همان پخش مستقیم می‌ماند
+    }
+    applyRoute();
   }
   function detachRemote(u){
     const a = audios.get(u); if (a) { a.srcObject = null; a.remove(); audios.delete(u); }
+    const lp = loops.get(u); if (lp) { try { lp.kill(); } catch (e) {} loops.delete(u); }
     const l = levels.get(u); if (l) { try { l.src.disconnect(); } catch (e) {} levels.delete(u); }
     connected.delete(u);
   }
@@ -1130,6 +1210,9 @@
     roomKey = key || await roomToKey(room, pass);
     dirId = PREFIX + roomKey + '-dir';
     loadRoom();
+    // اولین نفری که گروه را می‌سازد میزبان است (اگر نفر دیگری با ادعای قدیمی‌تر پیدا شود، میزبانی به او می‌رسد)
+    if (!host && Object.keys(roster).length === 0) { host = { u: uid, n: myName, ts: Date.now() }; LS.set(k('host'), host); }
+    else if (host && host.u === uid && host.n !== myName) { host.n = myName; LS.set(k('host'), host); }
     saveGroup();
     SS.set(PREFIX + 'active', { name, room, pass });
     const beat = () => LS.set(PREFIX + 'open', { key: roomKey, t: Date.now() });
@@ -1154,6 +1237,7 @@
   function teardown(){
     leaving = true; clearInterval(retryTimer); clearInterval(beatTimer);
     try { if (call) endCall('ended', true); if (incoming) clearIncoming(); } catch (e) {}
+    loops.forEach(l => { try { l.kill(); } catch (e) {} }); loops.clear();
     conns.forEach(r => { try { r.conn && r.conn.close(); } catch (e) {} }); conns.clear();
     try { dirConn && dirConn.close(); } catch (e) {}
     try { dirPeer && dirPeer.destroy(); } catch (e) {}
@@ -1163,7 +1247,6 @@
   function backHome(){
     LS.del(PREFIX + 'open'); SS.del(PREFIX + 'active');
     try { history.replaceState(null, '', location.pathname); } catch (e) {}
-    try { window.close(); } catch (e) {}
     location.reload();
   }
   $('joinBtn').addEventListener('click', async () => {
@@ -1192,23 +1275,42 @@
     try { await navigator.clipboard.writeText(url); toast('لینک کپی شد' + (roomPass ? ' (رمز گروه را جداگانه بدهید)' : '')); }
     catch (e) { prompt('لینک گروه:', url); }
   });
-  // خروج معمولی: فقط صفحه بسته می‌شود، عضویت و اطلاعات می‌مانند
+  // بازگشت به صفحه نخست: عضویت و اطلاعات می‌مانند و گروه در لیست «گروه‌های شما» دیده می‌شود
   $('exitBtn').addEventListener('click', () => {
     exitChatPolicy();
+    saveGroup();
     teardown();
     backHome();
   });
-  // ترک گروه
-  $('leaveBtn').addEventListener('click', () => { $('modal').hidden = false; });
+  // ترک گروه / حذف گروه (پنجره‌ی تأیید مشترک)
+  function openModal(mode){
+    modalMode = mode;
+    $('modalText').innerHTML = mode === 'delete'
+      ? '<b>حذف گروه؟</b><br>گروه برای همه‌ی اعضا حذف می‌شود و قابل بازگشت نیست.'
+      : '<b>ترک گروه؟</b><br>عضویت شما پاک می‌شود و دیگر تماس‌های این گروه را دریافت نخواهید کرد. گروه با برچسب «ترک شده» در صفحه نخست می‌ماند و اگر گروه باقی باشد می‌توانید دوباره وارد شوید.';
+    $('modalYes').textContent = mode === 'delete' ? 'بله، حذف کن' : 'بله، ترک کن';
+    $('modal').hidden = false;
+  }
+  $('leaveBtn').addEventListener('click', () => openModal('leave'));
+  $('delBtn').addEventListener('click', () => { if (isHost()) openModal('delete'); });
   $('modalNo').addEventListener('click', () => { $('modal').hidden = true; });
   $('modalYes').addEventListener('click', () => {
     $('modal').hidden = true;
+    if (modalMode === 'delete') {
+      if (!isHost()) return;
+      broadcast({ t: 'destroy', ts: Date.now() });
+      setTimeout(() => {
+        wipeRoomAll(); removeGroup(roomKey);
+        SS.set(PREFIX + 'notice', 'گروه حذف شد');
+        teardown(); backHome();
+      }, 450);
+      return;
+    }
     const lastMember = Object.keys(roster).length === 0;   // کسی جز من در گروه نمانده
     broadcast({ t: 'bye', ts: Date.now() });
     setTimeout(() => {
-      if (lastMember) wipeRoomAll();       // آخرین نفر رفت → همه‌چیز (تماس‌ها و پیام‌ها) پاک می‌شود
-      else exitChatPolicy();
-      forgetGroup(roomKey);
+      if (lastMember) { wipeRoomAll(); removeGroup(roomKey); }   // آخرین نفر رفت → گروه دیگر وجود ندارد
+      else { exitChatPolicy(); markLeft(roomKey); }               // گروه با برچسب «ترک شده» در لیست می‌ماند
       teardown();
       backHome();
     }, 350);
@@ -1244,6 +1346,8 @@
     const h = decodeURIComponent(location.hash.replace(/^#/, ''));
     if (h) $('room').value = h;
     renderGroups();
+    const note = SS.get(PREFIX + 'notice', null);
+    if (note) { SS.del(PREFIX + 'notice'); toast(note); }
   })();
 })();
 </script>
