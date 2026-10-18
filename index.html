@@ -17,6 +17,7 @@
     color-scheme:dark;
   }
   @media (prefers-color-scheme: light){
+    .grp .hostn{color:#0a9a9a}
     :root{
       --bg:#dcd8c6; --panel:#ece8d8; --panel2:#e2decb; --line:#bdb8a0;
       --text:#23261d; --muted:#6a6755; --amber:#b87800; --live:#1f9d45; --danger:#d1382b;
@@ -63,6 +64,7 @@
   .grp.sel{border-color:var(--amber); box-shadow:0 0 0 2px color-mix(in srgb,var(--amber) 30%,transparent)}
   .grp .g1{min-width:0; display:flex; flex-direction:column}
   .grp b{font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .grp .hostn{color:#22d3d0; font-weight:800}
   .grp .left{color:var(--danger); font-weight:800; margin-inline-start:6px}
   .grp small{color:var(--muted); font-size:.78rem}
   .grp .g2{flex:none; font-size:.78rem; color:var(--muted); display:flex; align-items:center; gap:6px}
@@ -342,7 +344,7 @@
   const mc = new Map();
   const audios = new Map(), levels = new Map(), connected = new Set(), loops = new Map();
   let actx = null, tickTimer = null, levelTimer = null, blinkTimer = null, retryTimer = null, beatTimer = null;
-  let ringTimer = null;
+  let ringTimer = null, routeTimer = null;
   let notif = null;
   let selectedGroup = null;
   const origTitle = document.title;
@@ -429,9 +431,11 @@
   //  3) setSinkId (اگر مرورگر خروجی earpiece را بدهد)
   //  4) «حلقه‌ی WebRTC محلی»: صدای طرف مقابل از یک اتصال داخلی رد می‌شود تا سیستم آن را «صدای تماس» حساب کند
   //     (در اندروید و iOS صدای تماس به‌جای بلندگوی مدیا از گوشی پخش می‌شود)
-  const HAS_NATIVE = !!(window.WTNative && typeof window.WTNative.setSpeaker === 'function');
+  const hasNative = () => !!((window.WTNative && typeof window.WTNative.setSpeaker === 'function') || window.AudioToggle);
   function nativeRoute(sp){
-    try { if (HAS_NATIVE) window.WTNative.setSpeaker(!!sp); } catch (e) {}
+    try { if (window.WTNative && typeof window.WTNative.setSpeaker === 'function') window.WTNative.setSpeaker(!!sp); } catch (e) {}
+    // Cordova/Capacitor: cordova-plugin-audiotoggle
+    try { if (window.AudioToggle && AudioToggle.setAudioMode) AudioToggle.setAudioMode(sp ? AudioToggle.SPEAKER : AudioToggle.EARPIECE); } catch (e) {}
     try { window.dispatchEvent(new CustomEvent('wt-audio-route', { detail: { speaker: !!sp, inCall: !!call } })); } catch (e) {}
   }
   function audioSessionType(t){
@@ -443,7 +447,8 @@
       if (typeof a.setSinkId !== 'function' || !navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
       const ds = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audiooutput');
       if (!ds.length) return;
-      const d = ds.find(x => (sp ? /speaker|بلندگو/i : /earpiece|receiver|handset|گوشی/i).test(x.label));
+      const d = ds.find(x => (sp ? /speaker|بلندگو/i : /earpiece|receiver|handset|phone|گوشی/i).test(x.label) && (sp || !/speaker|بلندگو/i.test(x.label)))
+        || (sp ? null : ds.find(x => x.deviceId === 'communications'));
       if (d) await a.setSinkId(d.deviceId);
     } catch (e) {}
   }
@@ -467,7 +472,7 @@
     if (!IS_MOBILE) return;
     audioSessionType(call ? (speakerOn ? 'playback' : 'play-and-record') : 'playback');
     audios.forEach(a => setSink(a, speakerOn));
-    if (speakerOn && !HAS_NATIVE) setTimeout(() => {   // اگر سیستم با حالت بلندگو میکروفون را قطع کرد، برگرد
+    if (speakerOn && !hasNative()) setTimeout(() => {   // اگر سیستم با حالت بلندگو میکروفون را قطع کرد، برگرد
       const t = localStream && localStream.getAudioTracks()[0];
       if (speakerOn && call && t && t.muted) { speakerOn = false; applyRoute(); renderSpk(); toast('این دستگاه اجازه‌ی تغییر به بلندگو را نداد'); }
     }, 900);
@@ -549,7 +554,8 @@
       const b = document.createElement('button'); b.type = 'button';
       b.className = 'grp' + (selectedGroup && selectedGroup.key === g.key ? ' sel' : '');
       const g1 = document.createElement('span'); g1.className = 'g1';
-      const t = document.createElement('b'); t.textContent = g.room + (g.hostName ? ' (' + g.hostName + ')' : '');
+      const t = document.createElement('b'); t.append(document.createTextNode(g.room));
+      if (g.hostName) { const hn = document.createElement('span'); hn.className = 'hostn'; hn.textContent = ' (' + g.hostName + ')'; t.append(hn); }
       if (g.left) { const l = document.createElement('span'); l.className = 'left'; l.textContent = '(ترک شده)'; t.append(l); }
       const s = document.createElement('small'); s.textContent = 'نام شما: ' + g.name;
       g1.append(t, s);
@@ -995,6 +1001,7 @@
   function startCallUI(){
     clearInterval(tickTimer); clearInterval(levelTimer);
     tickTimer = setInterval(renderStatus, 1000);
+    clearInterval(routeTimer); routeTimer = setInterval(() => { if (call) applyRoute(); }, 2500);
     levelTimer = setInterval(levelTick, 150);
     if (localStream) watch(uid, localStream);
     try { if ('wakeLock' in navigator) navigator.wakeLock.request('screen').then(w => { wakeLock = w; }).catch(() => {}); } catch (e) {}
@@ -1059,7 +1066,7 @@
   function endCall(reason, silent){
     if (!call) return;
     const c = call; call = null;
-    clearTimeout(c.timer); clearInterval(tickTimer); clearInterval(levelTimer); stopRing();
+    clearTimeout(c.timer); clearInterval(routeTimer); clearInterval(tickTimer); clearInterval(levelTimer); stopRing();
     if (c.state === 'ringing' && c.dir === 'out') {
       broadcast({ t: 'cancel', cid: c.cid });
       logUpsert({ id: c.cid, dir: 'out', status: 'noanswer' });
@@ -1123,7 +1130,7 @@
     const p = a.play(); if (p && p.catch) p.catch(() => {});
     watch(u, s); connected.add(u); renderCall();
     // موبایل: صدا را از حلقه‌ی WebRTC محلی رد کن تا مثل «صدای تماس» از گوشی پخش شود
-    if (IS_MOBILE && !HAS_NATIVE && typeof RTCPeerConnection !== 'undefined') {
+    if (IS_MOBILE && !hasNative() && typeof RTCPeerConnection !== 'undefined') {
       const old = loops.get(u); if (old) { try { old.kill(); } catch (e) {} loops.delete(u); }
       makeLoop(s).then(l => {
         if (audios.get(u) !== a || !call) { l.kill(); return; }
