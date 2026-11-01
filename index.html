@@ -229,6 +229,28 @@
   .vt.self.small .pa{width:40px; height:40px; font-size:1.1rem}
   #vMore{position:absolute; left:50%; transform:translateX(-50%); z-index:5; padding:3px 12px; border-radius:999px; background:rgba(0,0,0,.55); color:#fff; font-size:.75rem; direction:rtl}
 
+  /* ====== دسکتاپ: صفحه‌ی تماس در قاب هم‌اندازه‌ی گوشی، وسط صفحه، بدون اسکرول ====== */
+  @media (min-width:700px) and (pointer:fine){
+    #callScreen{
+      inset:auto; left:50%; top:50%; transform:translate(-50%,-50%);
+      width:400px; height:min(860px, calc(100vh - 32px)); height:min(860px, calc(100dvh - 32px));
+      border-radius:32px; overflow:hidden;
+      box-shadow:0 0 0 100vmax rgba(0,0,0,.78), 0 30px 80px rgba(0,0,0,.6);
+      padding:44px 20px 36px;
+    }
+    #callScreen.vid{padding:16px 12px 26px}
+    #callScreen .top{flex:1; min-height:0; overflow:hidden; padding-top:18px}
+    #callScreen.vid .top{padding-top:0}
+    #callScreen.vid::before,#callScreen.vid::after{border-radius:inherit}
+  }
+  @media (min-width:700px) and (pointer:fine) and (max-height:720px){
+    #callScreen:not(.vid){padding-top:26px; padding-bottom:22px}
+    #callScreen .avatar{width:80px; height:80px; font-size:2rem; margin-bottom:6px}
+    #callScreen #csName{font-size:1.6rem}
+    #callScreen .tiles{margin-top:10px; gap:10px}
+    #callScreen #csVolWrap{margin-bottom:12px}
+  }
+
   #modal{position:fixed; inset:0; z-index:80; background:rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center; padding:20px}
   #modal .box{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px; max-width:340px; width:100%}
   #modal p{margin:0 0 16px}
