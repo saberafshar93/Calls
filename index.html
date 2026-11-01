@@ -272,6 +272,7 @@
     <div class="field"><label for="room">نام گروه</label><input type="text" id="room" maxlength="40" autocomplete="off" value="main"></div>
     <p id="pickHint" hidden></p>
     <div class="field"><label for="pass">رمز گروه (اگر گروه رمز دارد)</label><input type="password" id="pass" maxlength="40" autocomplete="off"></div>
+    <p class="note" style="margin:0 0 12px">شناسه‌ی گروه: <b id="gidVal" style="color:var(--amber);letter-spacing:.12em">—</b> — اگر دو نفر وارد یک گروه شده‌اند، این شناسه باید برای هر دو یکسان باشد.</p>
     <button class="primary" id="joinBtn">ورود / ساخت گروه</button>
     <p class="err" id="err" role="alert"></p>
 
@@ -291,6 +292,7 @@
 
     <div class="card head">
       <div class="gname" id="gName">گروه</div>
+      <div class="gsub" id="gidLine"></div>
       <div class="gsub"><span id="onlineCount">1</span> نفر آنلاین · <span id="totalCount">1</span> عضو</div>
       <div class="callrow">
         <button id="callBtn" aria-label="تماس صوتی با گروه" title="تماس صوتی">
@@ -391,11 +393,26 @@
   const RING_MS = 45000;
   const MAX_CHAT = 500;
   // برای اتصال پایدار بین شبکه‌های مختلف (دیتای موبایل) یک سرور TURN اضافه کنید:
-  const ICE = { iceServers: [
+  // سرورهای STUN + TURN. TURN وقتی لازم است که دو نفر در دو شبکه‌ی مختلف (مثلاً دیتای موبایل ↔ وای‌فای) باشند.
+  // سرورهای عمومیِ رایگان گاهی قطع یا محدود می‌شوند؛ برای پایداری واقعی سرور TURN اختصاصی خودتان را بگذارید:
+  //   حساب رایگان metered.ca یا coturn روی سرور خودتان → آدرس/نام کاربری/رمز را در MY_TURN وارد کنید.
+  const MY_TURN = [
+    // { urls: ['turn:YOUR_TURN_HOST:3478', 'turn:YOUR_TURN_HOST:3478?transport=tcp', 'turns:YOUR_TURN_HOST:443?transport=tcp'], username: 'USER', credential: 'PASS' }
+  ];
+  const ICE = { iceCandidatePoolSize: 4, iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' }
-    // , { urls: 'turn:YOUR_TURN_HOST:3478', username: 'USER', credential: 'PASS' }
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun.cloudflare.com:3478' },
+    ...MY_TURN,
+    // TURN عمومی (بهترین تلاش، تضمینی نیست)
+    { urls: ['turn:openrelay.metered.ca:80', 'turn:openrelay.metered.ca:443', 'turn:openrelay.metered.ca:443?transport=tcp', 'turns:openrelay.metered.ca:443?transport=tcp'], username: 'openrelayproject', credential: 'openrelayproject' }
   ] };
+  // اگر سرور سیگنالینگ پیش‌فرض PeerJS (0.peerjs.com) برای شما در دسترس نیست، سرور خودتان را اینجا بدهید:
+  // مثال: { host: 'peer.example.com', port: 443, path: '/', secure: true }
+  const PEER_SERVER = {};
+  const peerOpts = () => Object.assign({ debug: 0, config: ICE }, PEER_SERVER);
+  const IN_APP = /Telegram|Instagram|FBAN|FBAV|FB_IAB|Line\/|Snapchat|MicroMessenger|Twitter|GSA\//i.test(navigator.userAgent || '');
   const UA = navigator.userAgent || '';
   const IS_MOBILE = !!((navigator.userAgentData && navigator.userAgentData.mobile) || /Android|iPhone|iPad|iPod/i.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1));
   const PHONE_SVG = '<svg class="ico" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>';
@@ -454,10 +471,42 @@
     clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2800);
   }
   function setConn(state, text){ const c = $('conn'); c.className = 'conn ' + state; $('connText').textContent = text; }
+  // یکسان‌سازی متن: حروف عربی/فارسی (ي→ی، ك→ک)، ارقام فارسی/عربی→لاتین، نیم‌فاصله و نویسه‌های نامرئی،
+  // نقل‌قول‌های هوشمند iOS و فاصله‌های اضافه. باعث می‌شود iOS/اندروید/دسکتاپ با کیبوردهای مختلف به یک گروه برسند.
+  function norm(s){
+    s = String(s == null ? '' : s);
+    try { s = s.normalize('NFKC'); } catch (e) {}
+    return s
+      .replace(/[\u06F0-\u06F9]/g, c => String(c.charCodeAt(0) - 0x06F0))
+      .replace(/[\u0660-\u0669]/g, c => String(c.charCodeAt(0) - 0x0660))
+      .replace(/[\u064A\u0649\u06D2]/g, '\u06CC').replace(/\u0643/g, '\u06A9')
+      .replace(/[\u0629\u06C0]/g, '\u0647')
+      .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
+      .replace(/[\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF\u00AD]/g, '')
+      .replace(/[\u2018\u2019\u201B]/g, "'").replace(/[\u201C\u201D\u201F]/g, '"').replace(/[\u2013\u2014\u2212]/g, '-')
+      .replace(/\s+/g, ' ').trim();
+  }
   async function roomToKey(name, pass){
-    const data = new TextEncoder().encode('wt2|' + name.trim().toLowerCase() + '|' + pass);
+    const data = new TextEncoder().encode('wt3|' + norm(name).toLowerCase() + '|' + norm(pass));
     const buf = await crypto.subtle.digest('SHA-256', data);
     return [...new Uint8Array(buf)].slice(0, 10).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  const gidOf = key => String(key || '').slice(0, 4).toUpperCase();
+  let gidSeq = 0;
+  async function updateGid(){
+    const n = ++gidSeq, r = $('room').value, p = $('pass').value;
+    let v = '—';
+    try {
+      if (selectedGroup && !p) v = gidOf(selectedGroup.key);
+      else if (r.trim()) v = gidOf(await roomToKey(r, p));
+    } catch (e) {}
+    if (n === gidSeq) $('gidVal').textContent = v;
+  }
+  function kickNet(){
+    if (leaving || !roomKey) return;
+    try { if (me && !me.destroyed && me.disconnected) me.reconnect(); } catch (e) {}
+    connectAll();
+    if (me && me.id && !dirConn && !claiming && !joining) claimDirectory();
   }
   function sendTo(u, msg){ const r = conns.get(u); try { if (r && r.conn && r.conn.open) { r.conn.send(msg); return true; } } catch (e) {} return false; }
   function broadcast(msg){ conns.forEach(r => { try { if (r.conn && r.conn.open) r.conn.send(msg); } catch (e) {} }); }
@@ -626,10 +675,10 @@
   }
 
   // ---------- saved groups (home) ----------
-  const getGroups = () => { const a = LS.get(PREFIX + 'groups', []); return Array.isArray(a) ? a.filter(g => g && g.key && g.room) : []; };
+  const getGroups = () => { const a = LS.get(PREFIX + 'groups', []); return Array.isArray(a) ? a.filter(g => g && g.key && g.room && g.v === 3) : []; };
   function saveGroup(){
     const a = getGroups().filter(g => g.key !== roomKey);
-    a.push({ key: roomKey, room: roomName, name: myName, hasPass: !!roomPass, last: Date.now(), hostName: host ? host.n : '', left: false });
+    a.push({ key: roomKey, room: roomName, name: myName, hasPass: !!roomPass, v: 3, last: Date.now(), hostName: host ? host.n : '', left: false });
     LS.set(PREFIX + 'groups', a);
   }
   function removeGroup(key){ LS.set(PREFIX + 'groups', getGroups().filter(g => g.key !== key)); }
@@ -663,6 +712,7 @@
     renderGroups();
     window.scrollTo({ top: 0, behavior: 'smooth' });
     (g.hasPass ? $('pass') : $('joinBtn')).focus({ preventScroll: true });
+    updateGid();
   }
   $('room').addEventListener('input', () => { if (selectedGroup) { selectedGroup = null; $('pickHint').hidden = true; renderGroups(); } });
 
@@ -798,7 +848,7 @@
   // ---------- networking ----------
   function createPeer(){
     if (leaving) return;
-    me = new Peer(pid(uid), { debug: 0, config: ICE });
+    me = new Peer(pid(uid), peerOpts());
     me.on('open', () => {
       peerTries = 0; setConn('ok', 'آنلاین');
       if (!dirStarted) { dirStarted = true; claimDirectory(); }
@@ -874,7 +924,7 @@
   function claimDirectory(){
     if (leaving || claiming || dirConn) return;
     claiming = true; let settled = false;
-    const dp = new Peer(dirId, { debug: 0, config: ICE });
+    const dp = new Peer(dirId, peerOpts());
     dp.on('open', () => {
       settled = true; claiming = false; dirPeer = dp;
       dp.on('connection', onDirIncoming);
@@ -1547,6 +1597,7 @@
     initAudio();
     $('joinCard').hidden = true; $('app').hidden = false;
     $('gName').textContent = roomName;
+    $('gidLine').textContent = 'شناسه‌ی گروه: ' + gidOf(roomKey) + ' (برای همه‌ی اعضا یکسان است)';
     renderChat(); renderLog(); renderMembers(); updateMissedBanner(); updateNotifBanner(); updateAudioBanner();
     try { history.replaceState(null, '', '#' + encodeURIComponent(roomName)); } catch (e) {}
     setConn('', 'در حال اتصال…');
@@ -1644,13 +1695,15 @@
   });
   $('dnd').addEventListener('change', e => LS.set(k('dnd'), e.target.checked));
 
+  window.addEventListener('online', kickNet);
+  window.addEventListener('pageshow', kickNet);
   window.addEventListener('beforeunload', e => {
     if (call || incoming) { e.preventDefault(); e.returnValue = ''; }
   });
   window.addEventListener('pagehide', () => { try { if (call) endCall('ended', true); } catch (e) {} });
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-      unlockAudio(); if (incoming) stopBlink(); updateNotifBanner();
+      unlockAudio(); if (incoming) stopBlink(); updateNotifBanner(); kickNet();
       if (call && call.video) vtiles.forEach(t => { try { const p = t.v.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} });
     }
   });
@@ -1673,8 +1726,12 @@
     }
     $('joinCard').hidden = false;
     $('name').value = LS.get(PREFIX + 'lastname', '') || '';
-    const h = decodeURIComponent(location.hash.replace(/^#/, ''));
+    let h = '';
+    try { h = decodeURIComponent(location.hash.replace(/^#/, '')); } catch (e) { h = location.hash.replace(/^#/, ''); }
     if (h) $('room').value = h;
+    ['room', 'pass'].forEach(id => $(id).addEventListener('input', updateGid));
+    updateGid();
+    if (IN_APP) $('err').textContent = 'به‌نظر می‌رسد لینک را داخل مرورگر یک پیام‌رسان باز کرده‌اید. برای تماس، لینک را در Safari یا Chrome باز کنید (⋯ ← Open in Browser).';
     renderGroups();
     const note = SS.get(PREFIX + 'notice', null);
     if (note) { SS.del(PREFIX + 'notice'); toast(note); }
