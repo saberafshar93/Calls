@@ -338,6 +338,16 @@
       <button class="ghost" id="copyBtn">کپی لینک گروه</button>
       <button class="ghost" id="exitBtn">بازگشت به صفحه نخست</button>
     </div>
+    <details class="card" id="diag">
+      <summary style="cursor:pointer;font-weight:800">🛠 وضعیت اتصال (عیب‌یابی)</summary>
+      <div id="diagSum" style="font-size:.85rem; margin:10px 0; line-height:1.9; white-space:pre-line"></div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap">
+        <button class="ghost" id="dgTurn" type="button">تست TURN</button>
+        <button class="ghost" id="dgReco" type="button">اتصال مجدد</button>
+        <button class="ghost" id="dgCopy" type="button">کپی گزارش</button>
+      </div>
+      <pre id="diagOut" dir="ltr" style="margin:10px 0 0; max-height:200px; overflow:auto; font-size:.7rem; line-height:1.5; background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:8px; white-space:pre-wrap; word-break:break-all; text-align:left"></pre>
+    </details>
     <div class="leave-wrap">
       <div class="row">
         <button class="ghost danger" id="leaveBtn">ترک گروه</button>
@@ -492,6 +502,63 @@
     return [...new Uint8Array(buf)].slice(0, 10).map(b => b.toString(16).padStart(2, '0')).join('');
   }
   const gidOf = key => String(key || '').slice(0, 4).toUpperCase();
+
+  // ---------- عیب‌یابی اتصال (برای پیدا کردن دلیل وصل نشدن روی iOS و ...) ----------
+  const dlog = [], cands = { host: 0, srflx: 0, relay: 0, prflx: 0 };
+  const sh = u => String(u || '').slice(0, 4);
+  function dg(msg){
+    dlog.push(new Date().toLocaleTimeString('en-GB') + '  ' + msg);
+    if (dlog.length > 200) dlog.shift();
+    renderDiag();
+  }
+  function diagSummary(){
+    const L = [];
+    const ios = /iPhone|iPad|iPod/.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1);
+    L.push('دستگاه: ' + (ios ? 'iOS' : (/Android/.test(UA) ? 'Android' : 'Desktop')) + (IN_APP ? ' | مرورگر درون‌برنامه‌ای!' : ''));
+    L.push('شناسه‌ی گروه: ' + gidOf(roomKey) + ' | شناسه‌ی من: ' + sh(uid));
+    L.push('سرور سیگنالینگ: ' + (me && me.open && !me.disconnected ? 'وصل ✅' : 'قطع ❌'));
+    L.push('دایرکتوری: ' + (dirPeer ? 'نگهدارنده ✅' : (dirConn ? 'عضو ✅' : 'نامشخص ⚠️')));
+    L.push('کاندیدهای ICE من: host=' + cands.host + ' srflx=' + cands.srflx + ' relay=' + cands.relay);
+    const ids = Object.keys(roster);
+    if (!ids.length) L.push('اعضا: هنوز کسی پیدا نشده');
+    ids.forEach(u => {
+      const r = conns.get(u); let ice = '';
+      try { if (r && r.conn && r.conn.peerConnection) ice = ' | ICE: ' + r.conn.peerConnection.iceConnectionState; } catch (e) {}
+      L.push('• ' + nameOf(u) + ' (' + sh(u) + '): ' + (isOnline(u) ? 'متصل ✅' : 'قطع ❌') + ice);
+    });
+    return L.join('\n');
+  }
+  function renderDiag(){
+    const d = $('diag'); if (!d || !d.open) return;
+    $('diagSum').textContent = diagSummary();
+    const o = $('diagOut'); o.textContent = dlog.join('\n'); o.scrollTop = o.scrollHeight;
+  }
+  function hookIce(conn, u){
+    try {
+      const pc = conn.peerConnection; if (!pc || pc._wt) return; pc._wt = 1;
+      pc.addEventListener('iceconnectionstatechange', () => dg('ICE ' + sh(u) + ' → ' + pc.iceConnectionState));
+      pc.addEventListener('icecandidate', e => {
+        if (!e.candidate) return;
+        const m = / typ (\w+)/.exec(e.candidate.candidate || '');
+        if (m && cands[m[1]] != null) cands[m[1]]++;
+      });
+    } catch (e) {}
+  }
+  async function testTurn(){
+    dg('تست TURN شروع شد (حدود ۹ ثانیه)…');
+    const res = { host: 0, srflx: 0, relay: 0 };
+    try {
+      const pc = new RTCPeerConnection({ iceServers: ICE.iceServers });
+      pc.createDataChannel('t');
+      pc.onicecandidate = e => { if (e.candidate) { const m = / typ (\w+)/.exec(e.candidate.candidate || ''); if (m && res[m[1]] != null) res[m[1]]++; } };
+      await pc.setLocalDescription(await pc.createOffer());
+      await new Promise(r => { const t = setTimeout(r, 9000); pc.onicegatheringstatechange = () => { if (pc.iceGatheringState === 'complete') { clearTimeout(t); r(); } }; });
+      pc.close();
+    } catch (e) { dg('خطا در تست: ' + (e && e.message)); }
+    dg('نتیجه‌ی تست: host=' + res.host + ' srflx=' + res.srflx + ' relay=' + res.relay);
+    const msg = res.relay > 0 ? 'TURN کار می‌کند ✅' : 'هیچ TURN فعالی پیدا نشد ❌ — برای اتصال بین شبکه‌های مختلف سرور TURN اختصاصی لازم است';
+    dg(msg); toast(msg);
+  }
   let gidSeq = 0;
   async function updateGid(){
     const n = ++gidSeq, r = $('room').value, p = $('pass').value;
@@ -850,7 +917,7 @@
     if (leaving) return;
     me = new Peer(pid(uid), peerOpts());
     me.on('open', () => {
-      peerTries = 0; setConn('ok', 'آنلاین');
+      peerTries = 0; setConn('ok', 'آنلاین'); dg('سرور سیگنالینگ وصل شد');
       if (!dirStarted) { dirStarted = true; claimDirectory(); }
       connectAll();
     });
@@ -858,10 +925,11 @@
     me.on('call', onMediaCall);
     me.on('disconnected', () => {
       if (leaving) return;
-      setConn('bad', 'قطع شد، اتصال مجدد…');
+      setConn('bad', 'قطع شد، اتصال مجدد…'); dg('ارتباط با سرور سیگنالینگ قطع شد');
       setTimeout(() => { try { if (!leaving && me && me.disconnected) me.reconnect(); } catch (e) {} }, 1500);
     });
     me.on('error', e => {
+      dg('خطای PeerJS: ' + e.type + ' — ' + String(e.message || '').slice(0, 120));
       if (e.type === 'unavailable-id') {
         try { me.destroy(); } catch (x) {}
         me = null; dirStarted = false;
@@ -882,8 +950,9 @@
   function connectAll(){ Object.keys(roster).forEach(connectUid); }
   function connectUid(u){
     if (!me || !me.id || me.disconnected || u === uid || !isUid(u) || (u in gone) || isOnline(u) || pending.has(u)) return;
-    pending.add(u); setTimeout(() => pending.delete(u), 7000);
-    try { setupConn(me.connect(pid(u), { reliable: true }), true); } catch (e) { pending.delete(u); }
+    pending.add(u); setTimeout(() => { pending.delete(u); if (!isOnline(u)) dg('اتصال به ' + sh(u) + ' بعد از ۷ ثانیه برقرار نشد'); }, 7000);
+    dg('تلاش برای اتصال به ' + sh(u));
+    try { setupConn(me.connect(pid(u), { reliable: true, serialization: 'json' }), true); } catch (e) { pending.delete(u); dg('خطا در connect: ' + (e && e.message)); }
   }
   function setupConn(conn, outgoing){
     const u = uidOf(conn.peer);
@@ -897,11 +966,13 @@
     }
     if (!rec) { rec = { uid: u, name: (roster[u] && roster[u].name) || '', conn: null }; conns.set(u, rec); }
     rec.conn = conn; rec.outgoing = outgoing;
-    const onOpen = () => { pending.delete(u); sendHi(conn); renderMembers(); };
+    dg((outgoing ? 'اتصال خروجی' : 'اتصال ورودی') + ' با ' + sh(u));
+    setTimeout(() => hookIce(conn, u), 0);
+    const onOpen = () => { pending.delete(u); dg('کانال داده با ' + sh(u) + ' باز شد ✅'); sendHi(conn); renderMembers(); };
     if (conn.open) onOpen(); else conn.on('open', onOpen);
     conn.on('data', m => { if (rec.conn === conn) handleMsg(rec, m); });
-    conn.on('close', () => drop(u, conn));
-    conn.on('error', () => drop(u, conn));
+    conn.on('close', () => { dg('کانال داده با ' + sh(u) + ' بسته شد'); drop(u, conn); });
+    conn.on('error', e => { dg('خطای کانال با ' + sh(u) + ': ' + String((e && e.message) || e).slice(0, 100)); drop(u, conn); });
   }
   function sendHi(conn){
     const list = Object.entries(roster).slice(0, 60).map(([u, r]) => ({ u, n: r.name }));
@@ -926,7 +997,7 @@
     claiming = true; let settled = false;
     const dp = new Peer(dirId, peerOpts());
     dp.on('open', () => {
-      settled = true; claiming = false; dirPeer = dp;
+      settled = true; claiming = false; dirPeer = dp; dg('من نگهدارنده‌ی دایرکتوری شدم');
       dp.on('connection', onDirIncoming);
       dp.on('disconnected', () => { if (!leaving) { try { dp.reconnect(); } catch (e) {} } });
       joinDirectory();
@@ -950,10 +1021,11 @@
   function joinDirectory(){
     if (leaving || joining || dirConn || !me || !me.id) return;
     joining = true; let c;
-    try { c = me.connect(dirId, { reliable: true }); } catch (e) { joining = false; setTimeout(claimDirectory, 2000); return; }
+    try { c = me.connect(dirId, { reliable: true, serialization: 'json' }); } catch (e) { joining = false; setTimeout(claimDirectory, 2000); return; }
     const timer = setTimeout(() => { if (!dirConn) { joining = false; try { c.close(); } catch (e) {} setTimeout(claimDirectory, 500); } }, 9000);
-    c.on('open', () => { clearTimeout(timer); joining = false; dirConn = c; });
+    c.on('open', () => { clearTimeout(timer); joining = false; dirConn = c; dg('به دایرکتوری وصل شدم'); });
     c.on('data', m => {
+      if (m && m.t === 'list' && Array.isArray(m.ids)) dg('لیست دایرکتوری: ' + m.ids.length + ' نفر');
       if (m && m.t === 'list' && Array.isArray(m.ids)) m.ids.forEach(p => {
         const u = uidOf(p);
         if (isUid(u) && u !== uid && !(u in gone)) { if (!roster[u]) { roster[u] = { name: 'ناشناس' }; saveRoster(); } connectUid(u); }
@@ -1598,6 +1670,7 @@
     $('joinCard').hidden = true; $('app').hidden = false;
     $('gName').textContent = roomName;
     $('gidLine').textContent = 'شناسه‌ی گروه: ' + gidOf(roomKey) + ' (برای همه‌ی اعضا یکسان است)';
+    dg('ورود به گروه ' + gidOf(roomKey) + ' | ' + UA.slice(0, 90));
     renderChat(); renderLog(); renderMembers(); updateMissedBanner(); updateNotifBanner(); updateAudioBanner();
     try { history.replaceState(null, '', '#' + encodeURIComponent(roomName)); } catch (e) {}
     setConn('', 'در حال اتصال…');
@@ -1695,6 +1768,14 @@
   });
   $('dnd').addEventListener('change', e => LS.set(k('dnd'), e.target.checked));
 
+  $('dgTurn').addEventListener('click', testTurn);
+  $('dgReco').addEventListener('click', () => { dg('اتصال مجدد دستی'); kickNet(); });
+  $('dgCopy').addEventListener('click', async () => {
+    const txt = diagSummary() + '\n\n' + dlog.join('\n');
+    try { await navigator.clipboard.writeText(txt); toast('گزارش کپی شد'); } catch (e) { prompt('گزارش:', txt); }
+  });
+  $('diag').addEventListener('toggle', renderDiag);
+  setInterval(renderDiag, 2000);
   window.addEventListener('online', kickNet);
   window.addEventListener('pageshow', kickNet);
   window.addEventListener('beforeunload', e => {
