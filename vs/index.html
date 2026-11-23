@@ -1,1 +1,1389 @@
-﻿
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1b1e18">
+<title>کنفرانس و استریم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1b1e18; --panel:#252921; --panel2:#2f3429; --line:#3d4435;
+    --text:#ece7d8; --muted:#a29f8d;
+    --amber:#f2a900; --live:#6fe08a; --danger:#ff5a4d; --red:#ff3b30; --green:#34c759;
+    color-scheme:dark;
+  }
+  @media (prefers-color-scheme: light){
+    .grp .hostn{color:#0a9a9a}
+    :root{
+      --bg:#dcd8c6; --panel:#ece8d8; --panel2:#e2decb; --line:#bdb8a0;
+      --text:#23261d; --muted:#6a6755; --amber:#b87800; --live:#1f9d45; --danger:#d1382b;
+      color-scheme:light;
+    }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:"Vazirmatn",Tahoma,"Segoe UI",system-ui,sans-serif; font-size:16px; line-height:1.7;
+    display:flex; justify-content:center;
+    padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0);
+  }
+  main{width:100%; max-width:980px; padding:18px 16px 28px; display:flex; flex-direction:column; gap:14px}
+  h1{font-size:1.15rem; font-weight:800; margin:0}
+  header{display:flex; align-items:center; justify-content:space-between}
+  .conn{display:flex; align-items:center; gap:8px; font-size:.85rem; color:var(--muted)}
+  .conn i{width:10px;height:10px;border-radius:50%;background:var(--muted);display:inline-block}
+  .conn.ok i{background:var(--live)} .conn.bad i{background:var(--danger)}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px}
+  .card h3{margin:0 0 8px; font-size:.95rem}
+  label{display:block; font-size:.85rem; color:var(--muted); margin-bottom:4px}
+  input[type=text],input[type=password]{
+    width:100%; padding:11px 12px; border-radius:8px; border:1px solid var(--line);
+    background:var(--panel2); color:var(--text); font:inherit; outline:none
+  }
+  input:focus-visible{border-color:var(--amber); box-shadow:0 0 0 2px color-mix(in srgb,var(--amber) 35%,transparent)}
+  .field{margin-bottom:12px}
+  button{font:inherit; cursor:pointer; color:inherit}
+  button:focus-visible{outline:3px solid var(--text); outline-offset:3px}
+  .primary{width:100%; padding:13px; border:0; border-radius:10px; background:var(--amber); color:#1b1300; font-weight:800; font-size:1rem}
+  .ghost{padding:9px 14px; border-radius:8px; border:1px solid var(--line); background:transparent; color:var(--text); font-size:.9rem}
+  .danger{border-color:var(--danger); color:var(--danger)}
+  .err{color:var(--danger); font-size:.9rem; margin:10px 0 0; min-height:1.4em}
+  .note{font-size:.82rem; color:var(--muted); margin:12px 0 0}
+  [hidden]{display:none !important}
+
+  #joinCard{max-width:460px; width:100%; align-self:center}
+
+  /* saved groups (home) */
+  #groupsBox{margin-top:16px; padding-top:14px; border-top:1px dashed var(--line)}
+  #groupList{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px}
+  .grp{width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px; text-align:right; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:var(--panel2); color:var(--text)}
+  .grp:hover{border-color:var(--amber)}
+  .grp.sel{border-color:var(--amber); box-shadow:0 0 0 2px color-mix(in srgb,var(--amber) 30%,transparent)}
+  .grp .g1{min-width:0; display:flex; flex-direction:column}
+  .grp b{font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .grp .hostn{color:#22d3d0; font-weight:800}
+  .grp .left{color:var(--danger); font-weight:800; margin-inline-start:6px}
+  .grp small{color:var(--muted); font-size:.78rem}
+  .grp .g2{flex:none; font-size:.78rem; color:var(--muted); display:flex; align-items:center; gap:6px}
+  #pickHint{font-size:.85rem; color:var(--amber); margin:0 0 12px}
+
+  .head{text-align:center; display:flex; flex-direction:column; align-items:center; gap:2px}
+  .head .gname{font-size:1.2rem; font-weight:800}
+  .head .gsub{font-size:.85rem; color:var(--muted)}
+
+  ul.list{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:8px}
+  .chip{display:flex; align-items:center; gap:8px; padding:5px 12px; border-radius:999px; border:1px solid var(--line); background:var(--panel2); font-size:.88rem}
+  .chip .dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+  .chip.on .dot{background:var(--live)} .chip.on{border-color:color-mix(in srgb,var(--live) 55%,var(--line))}
+  .chip.self{border-style:dashed}
+  .hosttag{color:var(--amber); font-size:.75rem; font-weight:800}
+  #hint{font-size:.85rem; color:var(--muted); margin:10px 0 0}
+
+  .switch{display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:.92rem; color:var(--text); margin:0}
+  .switch input{width:20px;height:20px;accent-color:var(--amber); flex:none}
+
+  /* ====== meeting ====== */
+  #meetCard{display:flex; flex-direction:column; gap:12px}
+  .mhead{display:flex; align-items:center; justify-content:space-between; gap:10px}
+  .mhead h3{margin:0}
+  .live{display:inline-flex; align-items:center; gap:6px; background:var(--red); color:#fff; font-size:.74rem; font-weight:800; padding:1px 10px; border-radius:6px}
+  #meetInfo{font-size:.9rem; color:var(--muted); margin:0}
+  .joinrow{display:flex; gap:10px; flex-wrap:wrap}
+  .joinrow .primary{flex:1 1 220px; width:auto}
+  .joinrow .ghost{flex:1 1 180px}
+
+  #stage{position:relative; width:100%; aspect-ratio:16/9; background:#000; border-radius:12px; overflow:hidden; direction:ltr}
+  #stage:fullscreen{border-radius:0; aspect-ratio:auto}
+  @media (max-width:600px){ #stage{aspect-ratio:4/5} }
+  #stagePh{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; color:#9aa; font-size:.95rem; padding:20px; direction:rtl}
+  #stageLive{position:absolute; top:10px; left:10px; z-index:6; direction:rtl}
+
+  .vt{
+    position:absolute; left:0; top:0; width:100%; height:100%; overflow:hidden; background:#1c2030; z-index:1;
+    transition:left .3s cubic-bezier(.2,.8,.2,1), top .3s cubic-bezier(.2,.8,.2,1), width .3s cubic-bezier(.2,.8,.2,1), height .3s cubic-bezier(.2,.8,.2,1), border-radius .3s, box-shadow .15s;
+    user-select:none; -webkit-user-select:none;
+  }
+  .vt.noanim{transition:none}
+  .vt video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; background:#000; pointer-events:none}
+  .vt.screen video{object-fit:contain}
+  .vt.mirror video{transform:scaleX(-1)}
+  .vt .ph{position:absolute; inset:0; display:none; align-items:center; justify-content:center; background:linear-gradient(160deg,#3a4256,#171a24)}
+  .vt.novid .ph{display:flex}
+  .vt.novid video{visibility:hidden}
+  .vt .pa{width:44px; height:44px; border-radius:50%; background:linear-gradient(160deg,#8d96aa,#5b6376); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.3rem; color:#fff}
+  .vt.main .pa{width:110px; height:110px; font-size:3rem}
+  .vt .nm{position:absolute; bottom:6px; left:6px; right:6px; text-align:center; font-size:.72rem; font-weight:600; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.9); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .vt.main .nm{text-align:left; left:12px; font-size:.85rem; bottom:10px}
+  .vt.small{z-index:3; border:2px solid rgba(255,255,255,.4); box-shadow:0 8px 22px rgba(0,0,0,.55); cursor:pointer}
+  .vt.speaking.small{border-color:var(--green); box-shadow:0 0 0 4px rgba(52,199,89,.35), 0 8px 22px rgba(0,0,0,.55)}
+  .vt.speaking.main{box-shadow:inset 0 0 0 3px var(--green)}
+  .vt.main.pinned{cursor:pointer}
+  #vMore{position:absolute; right:10px; top:10px; z-index:5; padding:3px 12px; border-radius:999px; background:rgba(0,0,0,.55); color:#fff; font-size:.75rem; direction:rtl}
+
+  .tbar{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; align-items:center}
+  .tb{padding:9px 14px; border-radius:10px; border:1px solid var(--line); background:var(--panel2); color:var(--text); font-size:.88rem; white-space:nowrap}
+  .tb:hover{border-color:var(--amber)}
+  .tb.on{border-color:var(--amber); background:color-mix(in srgb,var(--amber) 22%,var(--panel2)); font-weight:800}
+  .tb.off{border-color:var(--danger); color:var(--danger)}
+  .tb.dis{opacity:.5}
+  .tb.leave{background:var(--red); border-color:var(--red); color:#fff; font-weight:800}
+  .seg{display:inline-flex; border-radius:10px; overflow:hidden}
+  .seg .tb{border-radius:0}
+  .seg .tb + .tb{border-inline-start:0}
+  .seg .tb:first-child{border-radius:0 10px 10px 0}
+  .seg .tb:last-child{border-radius:10px 0 0 10px}
+  .row2{display:flex; flex-wrap:wrap; gap:14px 24px; align-items:center; justify-content:space-between; font-size:.85rem; color:var(--muted)}
+  .row2 .vol{display:flex; align-items:center; gap:8px}
+  .row2 input[type=range]{accent-color:var(--green); width:140px}
+  .row2 .switch{color:var(--text); font-size:.85rem}
+
+  #chatLog{height:220px; overflow-y:scroll; overscroll-behavior:contain; display:flex; flex-direction:column; gap:8px; padding:10px; background:var(--panel2); border:1px solid var(--line); border-radius:10px; scrollbar-width:thin}
+  #chatEmpty{margin:auto; text-align:center; color:var(--muted); font-size:.85rem; max-width:30ch}
+  .chat{display:flex; flex-direction:column; gap:10px; padding:12px}
+  .msg{max-width:86%; padding:6px 10px 4px; border-radius:12px; background:var(--panel); border:1px solid var(--line); overflow-wrap:anywhere; flex:none; align-self:flex-end}
+  .msg.self{align-self:flex-start; background:color-mix(in srgb,var(--amber) 22%,var(--panel2)); border-color:color-mix(in srgb,var(--amber) 45%,var(--line))}
+  .msg .who{font-size:.74rem; font-weight:800; color:var(--amber); line-height:1.5}
+  .msg.self .who{color:var(--live)}
+  .msg .txt{font-size:.95rem; line-height:1.6}
+  .msg time{display:block; font-size:.68rem; color:var(--muted); text-align:end}
+  #chatForm{display:flex; gap:8px}
+  #chatInput{flex:1; min-width:0}
+  #chatSend{flex:none; padding:0 18px; border:0; border-radius:8px; background:var(--amber); color:#1b1300; font-weight:800}
+  .chatopt{padding-top:6px; border-top:1px dashed var(--line)}
+  .chatopt small{display:block; color:var(--muted); font-size:.75rem; margin-top:4px}
+
+  .actions{display:flex; gap:10px}
+  .actions .ghost{flex:1}
+  .leave-wrap{margin-top:4px; padding-top:14px; border-top:1px dashed var(--line); display:flex; flex-direction:column; gap:8px}
+  .leave-wrap .row{display:flex; gap:10px}
+  .leave-wrap .row .ghost{flex:1}
+  .leave-wrap small{color:var(--muted); font-size:.78rem; text-align:center}
+
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important} }
+
+  #modal{position:fixed; inset:0; z-index:80; background:rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center; padding:20px}
+  #modal .box{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px; max-width:340px; width:100%}
+  #modal p{margin:0 0 16px}
+  #modal .actions{gap:10px}
+  .toast{position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom,0)); transform:translateX(-50%); background:var(--text); color:var(--bg); padding:8px 16px; border-radius:999px; font-size:.88rem; opacity:0; pointer-events:none; transition:opacity .2s; z-index:90; max-width:90vw; text-align:center}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>کنفرانس و استریم</h1>
+    <div class="conn" id="conn"><i></i><span id="connText">آفلاین</span></div>
+  </header>
+
+  <!-- صفحه‌ی اول: ورود + گروه‌های قبلی -->
+  <section class="card" id="joinCard" hidden>
+    <div class="field"><label for="name">نام شما</label><input type="text" id="name" maxlength="20" autocomplete="off"></div>
+    <div class="field"><label for="room">نام گروه</label><input type="text" id="room" maxlength="40" autocomplete="off" value="main"></div>
+    <p id="pickHint" hidden></p>
+    <div class="field"><label for="pass">رمز گروه (اگر گروه رمز دارد)</label><input type="password" id="pass" maxlength="40" autocomplete="off"></div>
+    <p class="note" style="margin:0 0 12px">شناسه‌ی گروه: <b id="gidVal" style="color:var(--amber);letter-spacing:.12em">—</b> — اگر دو نفر وارد یک گروه شده‌اند، این شناسه باید برای هر دو یکسان باشد.</p>
+    <button class="primary" id="joinBtn">ورود / ساخت گروه</button>
+    <p class="err" id="err" role="alert"></p>
+
+    <div id="groupsBox" hidden>
+      <h3>گروه‌های شما</h3>
+      <ul id="groupList"></ul>
+    </div>
+
+    <p class="note">دسترسی به میکروفون و دوربین فقط هنگام ورود به کنفرانس (یا روشن‌کردن آن‌ها) پرسیده می‌شود. عضویت شما در گروه‌ها روی همین دستگاه ذخیره می‌شود. با «ترک گروه»، گروه با برچسب «ترک شده» در لیست می‌ماند و اگر گروه هنوز باقی باشد می‌توانید دوباره وارد شوید.</p>
+  </section>
+
+  <!-- اپ -->
+  <section id="app" hidden style="display:flex;flex-direction:column;gap:14px">
+    <div class="card head">
+      <div class="gname" id="gName">گروه</div>
+      <div class="gsub" id="gidLine"></div>
+      <div class="gsub"><span id="onlineCount">1</span> نفر آنلاین · <span id="totalCount">1</span> عضو</div>
+    </div>
+
+    <div class="card" id="meetCard">
+      <div class="mhead"><h3>کنفرانس و پخش زنده</h3><span class="live" id="liveBadge" hidden>● پخش زنده</span></div>
+      <p id="meetInfo"></p>
+
+      <div class="joinrow" id="prejoin">
+        <button class="primary" id="joinMeetBtn">ورود به کنفرانس (دوربین + میکروفون)</button>
+        <button class="ghost" id="watchBtn">ورود فقط برای تماشا</button>
+      </div>
+
+      <div id="meetUI" hidden>
+        <div id="stage">
+          <div id="stagePh">هنوز کسی تصویر یا صدا منتشر نمی‌کند. دوربین، میکروفون یا اشتراک صفحه را روشن کنید.</div>
+          <div id="vMore" hidden></div>
+        </div>
+        <div class="tbar" style="margin-top:12px">
+          <button class="tb" id="tbMic">🎤 میکروفون</button>
+          <div class="seg" role="group" aria-label="منبع تصویر">
+            <button class="tb" id="tbCam">📷 دوربین</button>
+            <button class="tb" id="tbScr">🖥 صفحه</button>
+          </div>
+          <button class="tb" id="tbStopScr" hidden>⏹ توقف اشتراک صفحه</button>
+          <button class="tb" id="tbFlip" hidden>🔄 چرخش دوربین</button>
+          <button class="tb" id="tbFull">⛶ تمام‌صفحه</button>
+          <button class="tb leave" id="tbLeave">خروج از کنفرانس</button>
+        </div>
+        <div class="row2" style="margin-top:12px">
+          <label class="vol" style="margin:0"><span>بلندی صدا</span><input type="range" id="vol" min="0" max="1" step="0.05" value="1" aria-label="بلندی صدا"></label>
+          <label class="switch" id="permWrap" hidden><span>اجازه‌ی اشتراک صفحه به سایر اعضا</span><input type="checkbox" id="permChk"></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>اعضا</h3>
+      <ul class="list" id="members"></ul>
+      <p id="hint">هنوز عضو دیگری نیست. لینک گروه را برای دوستانتان بفرستید.</p>
+    </div>
+
+    <div class="card chat">
+      <h3 style="margin:0">پیام‌ها</h3>
+      <div id="chatLog" role="log" aria-live="polite"></div>
+      <form id="chatForm" autocomplete="off">
+        <input type="text" id="chatInput" maxlength="500" placeholder="پیام بنویسید…" aria-label="متن پیام" enterkeyhint="send">
+        <button type="submit" id="chatSend">ارسال</button>
+      </form>
+      <div class="chatopt">
+        <label class="switch"><span>با خروج من، پیام‌ها برای من پاک شود</span><input type="checkbox" id="clrExit"></label>
+        <small>اگر تیک نزده باشید، پیام‌ها مثل تاریخچه می‌مانند و با ورود دوباره می‌بینید. پیام‌ها تا وقتی همه‌ی اعضا گروه را ترک نکرده‌اند برای همه حفظ می‌شوند.</small>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="ghost" id="copyBtn">کپی لینک گروه</button>
+      <button class="ghost" id="exitBtn">بازگشت به صفحه نخست</button>
+    </div>
+    <details class="card" id="diag">
+      <summary style="cursor:pointer;font-weight:800">🛠 وضعیت اتصال (عیب‌یابی)</summary>
+      <div id="diagSum" style="font-size:.85rem; margin:10px 0; line-height:1.9; white-space:pre-line"></div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap">
+        <button class="ghost" id="dgTurn" type="button">تست TURN</button>
+        <button class="ghost" id="dgReco" type="button">اتصال مجدد</button>
+        <button class="ghost" id="dgCopy" type="button">کپی گزارش</button>
+      </div>
+      <pre id="diagOut" dir="ltr" style="margin:10px 0 0; max-height:200px; overflow:auto; font-size:.7rem; line-height:1.5; background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:8px; white-space:pre-wrap; word-break:break-all; text-align:left"></pre>
+    </details>
+    <div class="leave-wrap">
+      <div class="row">
+        <button class="ghost danger" id="leaveBtn">ترک گروه</button>
+        <button class="ghost danger" id="delBtn" hidden>حذف گروه</button>
+      </div>
+      <small>«بازگشت به صفحه نخست» فقط شما را به لیست گروه‌ها می‌برد و عضو می‌مانید. «ترک گروه» عضویت شما را پاک می‌کند ولی گروه با برچسب «ترک شده» در لیست می‌ماند. «حذف گروه» (فقط میزبان) گروه را برای همه حذف می‌کند.</small>
+    </div>
+  </section>
+</main>
+
+<div id="modal" hidden>
+  <div class="box">
+    <p id="modalText"></p>
+    <div class="actions"><button class="ghost danger" id="modalYes">بله</button><button class="ghost" id="modalNo">انصراف</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const PREFIX = 'wt2-';
+  const MAX_CHAT = 500;
+  // برای اتصال پایدار بین شبکه‌های مختلف (دیتای موبایل ↔ وای‌فای) سرور TURN اختصاصی خودتان را اینجا بگذارید:
+  const MY_TURN = [
+    // { urls: ['turn:YOUR_TURN_HOST:3478', 'turn:YOUR_TURN_HOST:3478?transport=tcp', 'turns:YOUR_TURN_HOST:443?transport=tcp'], username: 'USER', credential: 'PASS' }
+  ];
+  const ICE = { iceCandidatePoolSize: 4, iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun.cloudflare.com:3478' },
+    ...MY_TURN,
+    { urls: ['turn:openrelay.metered.ca:80', 'turn:openrelay.metered.ca:443', 'turn:openrelay.metered.ca:443?transport=tcp', 'turns:openrelay.metered.ca:443?transport=tcp'], username: 'openrelayproject', credential: 'openrelayproject' }
+  ] };
+  // سرور سیگنالینگ اختصاصی (اختیاری): { host: 'peer.example.com', port: 443, path: '/', secure: true }
+  const PEER_SERVER = {};
+  const peerOpts = () => Object.assign({ debug: 0, config: ICE }, PEER_SERVER);
+  const IN_APP = /Telegram|Instagram|FBAN|FBAV|FB_IAB|Line\/|Snapchat|MicroMessenger|Twitter|GSA\//i.test(navigator.userAgent || '');
+  const UA = navigator.userAgent || '';
+  const IS_MOBILE = !!((navigator.userAgentData && navigator.userAgentData.mobile) || /Android|iPhone|iPad|iPod/i.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1));
+  const CAN_SCREEN = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
+
+  // ---------- storage ----------
+  const mkStore = st => ({
+    get(k, d){ try { const v = st().getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v){ try { st().setItem(k, JSON.stringify(v)); } catch (e) {} },
+    del(k){ try { st().removeItem(k); } catch (e) {} }
+  });
+  const LS = mkStore(() => localStorage);
+  const SS = mkStore(() => sessionStorage);
+  let uid = LS.get(PREFIX + 'uid', null);
+  if (!uid || !/^[0-9a-f]{16}$/.test(uid)) {
+    uid = [...crypto.getRandomValues(new Uint8Array(8))].map(b => b.toString(16).padStart(2, '0')).join('');
+    LS.set(PREFIX + 'uid', uid);
+  }
+
+  // ---------- state ----------
+  let myName = '', roomName = '', roomPass = '', roomKey = '', dirId = '';
+  let me = null, dirPeer = null, dirConn = null;
+  let leaving = false, claiming = false, joining = false, dirStarted = false, peerTries = 0;
+  let roster = {}, gone = {};
+  let host = null;                       // {u, n, ts}
+  let modalMode = 'leave';
+  let chatArr = [], chatFloor = 0, chatSaveT = null, msgSeq = 0;
+  const conns = new Map();
+  const pending = new Set();
+  let selectedGroup = null;
+  let permAllow = false;                 // اجازه‌ی اشتراک صفحه برای همه‌ی اعضا (توسط میزبان)
+
+  // کنفرانس
+  let inMeet = false;
+  let actx = null, mix = null, micGain = null, selfAn = null;
+  let micStream = null, micSrc = null, micOn = false;
+  let camStream = null, camTrack = null, facing = 'user';
+  let screenStream = null, screenTrack = null, screenAudioSrc = null;
+  let srcMode = 'cam';                   // خروجی فعلی تصویر: 'cam' یا 'screen'
+  let blank = null;
+  let pinned = null, vol = 1, wakeLock = null, levelTimer = null, retryTimer = null, beatTimer = null;
+  const meetSet = new Set();             // اعضای دیگری که در کنفرانس‌اند
+  const pst = new Map();                 // وضعیت اعضا: {v:'cam'|'screen'|null, m:bool}
+  const mc = new Map();                  // اتصال‌های رسانه
+  const audios = new Map(), levels = new Map(), connected = new Set(), vstreams = new Map(), vtiles = new Map();
+
+  const k = n => PREFIX + n + '-' + roomKey;
+  const pid = u => PREFIX + roomKey + '-u-' + u;
+  const uidOf = p => { const i = String(p).indexOf('-u-'); return i < 0 ? null : p.slice(i + 3); };
+  const clean = s => String(s || '').slice(0, 20);
+  const isUid = s => typeof s === 'string' && /^[0-9a-f]{16}$/.test(s);
+  const isOnline = u => { const r = conns.get(u); return !!(r && r.conn && r.conn.open); };
+  const nameOf = u => u === uid ? myName : ((roster[u] && roster[u].name) || (conns.get(u) && conns.get(u).name) || 'ناشناس');
+  const isHost = () => !!(host && host.u === uid);
+  const canShare = () => isHost() || permAllow || !host;
+
+  // ---------- helpers ----------
+  function toast(msg){
+    const t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+  function setConn(state, text){ const c = $('conn'); c.className = 'conn ' + state; $('connText').textContent = text; }
+  function norm(s){
+    s = String(s == null ? '' : s);
+    try { s = s.normalize('NFKC'); } catch (e) {}
+    return s
+      .replace(/[\u06F0-\u06F9]/g, c => String(c.charCodeAt(0) - 0x06F0))
+      .replace(/[\u0660-\u0669]/g, c => String(c.charCodeAt(0) - 0x0660))
+      .replace(/[\u064A\u0649\u06D2]/g, '\u06CC').replace(/\u0643/g, '\u06A9')
+      .replace(/[\u0629\u06C0]/g, '\u0647')
+      .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
+      .replace(/[\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF\u00AD]/g, '')
+      .replace(/[\u2018\u2019\u201B]/g, "'").replace(/[\u201C\u201D\u201F]/g, '"').replace(/[\u2013\u2014\u2212]/g, '-')
+      .replace(/\s+/g, ' ').trim();
+  }
+  async function roomToKey(name, pass){
+    const data = new TextEncoder().encode('wt3|' + norm(name).toLowerCase() + '|' + norm(pass));
+    const buf = await crypto.subtle.digest('SHA-256', data);
+    return [...new Uint8Array(buf)].slice(0, 10).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  const gidOf = key => String(key || '').slice(0, 4).toUpperCase();
+
+  // ---------- عیب‌یابی ----------
+  const dlog = [], cands = { host: 0, srflx: 0, relay: 0, prflx: 0 };
+  const sh = u => String(u || '').slice(0, 4);
+  function dg(msg){
+    dlog.push(new Date().toLocaleTimeString('en-GB') + '  ' + msg);
+    if (dlog.length > 200) dlog.shift();
+    renderDiag();
+  }
+  function diagSummary(){
+    const L = [];
+    const ios = /iPhone|iPad|iPod/.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1);
+    L.push('دستگاه: ' + (ios ? 'iOS' : (/Android/.test(UA) ? 'Android' : 'Desktop')) + (IN_APP ? ' | مرورگر درون‌برنامه‌ای!' : '') + (CAN_SCREEN ? ' | اشتراک صفحه ✅' : ' | اشتراک صفحه ❌'));
+    L.push('شناسه‌ی گروه: ' + gidOf(roomKey) + ' | شناسه‌ی من: ' + sh(uid));
+    L.push('سرور سیگنالینگ: ' + (me && me.open && !me.disconnected ? 'وصل ✅' : 'قطع ❌'));
+    L.push('دایرکتوری: ' + (dirPeer ? 'نگهدارنده ✅' : (dirConn ? 'عضو ✅' : 'نامشخص ⚠️')));
+    L.push('کاندیدهای ICE من: host=' + cands.host + ' srflx=' + cands.srflx + ' relay=' + cands.relay);
+    L.push('کنفرانس: ' + (inMeet ? 'داخل ✅ (' + mc.size + ' اتصال رسانه)' : 'بیرون'));
+    const ids = Object.keys(roster);
+    if (!ids.length) L.push('اعضا: هنوز کسی پیدا نشده');
+    ids.forEach(u => {
+      const r = conns.get(u); let ice = '';
+      try { if (r && r.conn && r.conn.peerConnection) ice = ' | ICE: ' + r.conn.peerConnection.iceConnectionState; } catch (e) {}
+      L.push('• ' + nameOf(u) + ' (' + sh(u) + '): ' + (isOnline(u) ? 'متصل ✅' : 'قطع ❌') + ice);
+    });
+    return L.join('\n');
+  }
+  function renderDiag(){
+    const d = $('diag'); if (!d || !d.open) return;
+    $('diagSum').textContent = diagSummary();
+    const o = $('diagOut'); o.textContent = dlog.join('\n'); o.scrollTop = o.scrollHeight;
+  }
+  function hookIce(conn, u){
+    try {
+      const pc = conn.peerConnection; if (!pc || pc._wt) return; pc._wt = 1;
+      pc.addEventListener('iceconnectionstatechange', () => dg('ICE ' + sh(u) + ' → ' + pc.iceConnectionState));
+      pc.addEventListener('icecandidate', e => {
+        if (!e.candidate) return;
+        const m = / typ (\w+)/.exec(e.candidate.candidate || '');
+        if (m && cands[m[1]] != null) cands[m[1]]++;
+      });
+    } catch (e) {}
+  }
+  async function testTurn(){
+    dg('تست TURN شروع شد (حدود ۹ ثانیه)…');
+    const res = { host: 0, srflx: 0, relay: 0 };
+    try {
+      const pc = new RTCPeerConnection({ iceServers: ICE.iceServers });
+      pc.createDataChannel('t');
+      pc.onicecandidate = e => { if (e.candidate) { const m = / typ (\w+)/.exec(e.candidate.candidate || ''); if (m && res[m[1]] != null) res[m[1]]++; } };
+      await pc.setLocalDescription(await pc.createOffer());
+      await new Promise(r => { const t = setTimeout(r, 9000); pc.onicegatheringstatechange = () => { if (pc.iceGatheringState === 'complete') { clearTimeout(t); r(); } }; });
+      pc.close();
+    } catch (e) { dg('خطا در تست: ' + (e && e.message)); }
+    dg('نتیجه‌ی تست: host=' + res.host + ' srflx=' + res.srflx + ' relay=' + res.relay);
+    const msg = res.relay > 0 ? 'TURN کار می‌کند ✅' : 'هیچ TURN فعالی پیدا نشد ❌ — برای اتصال بین شبکه‌های مختلف سرور TURN اختصاصی لازم است';
+    dg(msg); toast(msg);
+  }
+  let gidSeq = 0;
+  async function updateGid(){
+    const n = ++gidSeq, r = $('room').value, p = $('pass').value;
+    let v = '—';
+    try {
+      if (selectedGroup && !p) v = gidOf(selectedGroup.key);
+      else if (r.trim()) v = gidOf(await roomToKey(r, p));
+    } catch (e) {}
+    if (n === gidSeq) $('gidVal').textContent = v;
+  }
+  function kickNet(){
+    if (leaving || !roomKey) return;
+    try { if (me && !me.destroyed && me.disconnected) me.reconnect(); } catch (e) {}
+    connectAll();
+    if (me && me.id && !dirConn && !claiming && !joining) claimDirectory();
+  }
+  function sendTo(u, msg){ const r = conns.get(u); try { if (r && r.conn && r.conn.open) { r.conn.send(msg); return true; } } catch (e) {} return false; }
+  function broadcast(msg){ conns.forEach(r => { try { if (r.conn && r.conn.open) r.conn.send(msg); } catch (e) {} }); }
+  function fmtTime(ts){
+    const d = new Date(ts);
+    const same = d.toDateString() === new Date().toDateString();
+    let t; try { t = d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', hour12: false }); } catch (e) { t = d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0'); }
+    if (same) return 'امروز ' + t;
+    try { return d.toLocaleDateString('fa-IR', { month: 'short', day: 'numeric' }) + ' ' + t; } catch (e) { return t; }
+  }
+
+  // ---------- persistence ----------
+  const saveRoster = () => LS.set(k('roster'), roster);
+  const saveGone = () => LS.set(k('gone'), gone);
+  function saveChat(){ clearTimeout(chatSaveT); chatSaveT = setTimeout(() => LS.set(k('chat'), chatArr), 250); }
+  function loadRoom(){
+    roster = LS.get(k('roster'), {}) || {};
+    const g = LS.get(k('gone'), {});
+    gone = Array.isArray(g) ? Object.fromEntries(g.map(x => [x, 0])) : (g || {});
+    chatArr = (LS.get(k('chat'), []) || []).map(cleanMsg).filter(Boolean).slice(-MAX_CHAT);
+    chatFloor = +LS.get(k('floor'), 0) || 0;
+    const h = LS.get(k('host'), null);
+    host = (h && isUid(h.u) && +h.ts > 0) ? { u: h.u, n: clean(h.n) || 'ناشناس', ts: +h.ts } : null;
+    permAllow = !!LS.get(k('allowshare'), false);
+    $('permChk').checked = permAllow;
+    delete roster[uid];
+    $('clrExit').checked = !!LS.get(k('clrexit'), false);
+  }
+  function wipeChatLocal(setFloor){
+    clearTimeout(chatSaveT); chatArr = []; LS.del(k('chat'));
+    if (setFloor) { chatFloor = Date.now(); LS.set(k('floor'), chatFloor); }
+  }
+  function wipeRoomAll(){
+    ['roster', 'gone', 'chat', 'floor', 'clrexit', 'host', 'allowshare'].forEach(n => LS.del(k(n)));
+  }
+  function exitChatPolicy(){ if ($('clrExit').checked) wipeChatLocal(true); }
+  $('clrExit').addEventListener('change', e => LS.set(k('clrexit'), e.target.checked));
+
+  // ---------- host ----------
+  function setHost(h){ host = h; LS.set(k('host'), h); saveGroup(); renderMembers(); renderMeet(); }
+
+  // ---------- saved groups (home) ----------
+  const getGroups = () => { const a = LS.get(PREFIX + 'groups', []); return Array.isArray(a) ? a.filter(g => g && g.key && g.room && g.v === 3) : []; };
+  function saveGroup(){
+    const a = getGroups().filter(g => g.key !== roomKey);
+    a.push({ key: roomKey, room: roomName, name: myName, hasPass: !!roomPass, v: 3, last: Date.now(), hostName: host ? host.n : '', left: false });
+    LS.set(PREFIX + 'groups', a);
+  }
+  function removeGroup(key){ LS.set(PREFIX + 'groups', getGroups().filter(g => g.key !== key)); }
+  function markLeft(key){ LS.set(PREFIX + 'groups', getGroups().map(g => g.key === key ? Object.assign({}, g, { left: true, last: Date.now() }) : g)); }
+  function renderGroups(){
+    const a = getGroups().sort((x, y) => (y.last || 0) - (x.last || 0));
+    $('groupsBox').hidden = a.length === 0;
+    const ul = $('groupList'); ul.innerHTML = '';
+    a.forEach(g => {
+      const li = document.createElement('li');
+      const b = document.createElement('button'); b.type = 'button';
+      b.className = 'grp' + (selectedGroup && selectedGroup.key === g.key ? ' sel' : '');
+      const g1 = document.createElement('span'); g1.className = 'g1';
+      const t = document.createElement('b'); t.append(document.createTextNode(g.room));
+      if (g.hostName) { const hn = document.createElement('span'); hn.className = 'hostn'; hn.textContent = ' (' + g.hostName + ')'; t.append(hn); }
+      if (g.left) { const l = document.createElement('span'); l.className = 'left'; l.textContent = '(ترک شده)'; t.append(l); }
+      const s = document.createElement('small'); s.textContent = 'نام شما: ' + g.name;
+      g1.append(t, s);
+      const g2 = document.createElement('span'); g2.className = 'g2';
+      g2.textContent = (g.hasPass ? '🔒 ' : '') + (g.last ? fmtTime(g.last) : '');
+      b.append(g1, g2);
+      b.addEventListener('click', () => pickGroup(g));
+      li.append(b); ul.append(li);
+    });
+  }
+  function pickGroup(g){
+    selectedGroup = g;
+    $('name').value = g.name; $('room').value = g.room; $('pass').value = ''; $('err').textContent = '';
+    const h = $('pickHint'); h.hidden = false;
+    h.textContent = g.hasPass ? 'گروه «' + g.room + '» انتخاب شد. رمز گروه را وارد کنید و ورود را بزنید.' : 'گروه «' + g.room + '» انتخاب شد. ورود را بزنید.';
+    renderGroups();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    (g.hasPass ? $('pass') : $('joinBtn')).focus({ preventScroll: true });
+    updateGid();
+  }
+  $('room').addEventListener('input', () => { if (selectedGroup) { selectedGroup = null; $('pickHint').hidden = true; renderGroups(); } });
+
+  // ---------- members UI ----------
+  const normSt = s => ({ v: (s && (s.v === 'cam' || s.v === 'screen')) ? s.v : null, m: !!(s && s.m) });
+  function stOf(u){ return u === uid ? myState() : (pst.get(u) || { v: null, m: false }); }
+  function renderMembers(){
+    const ul = $('members'); ul.innerHTML = '';
+    const add = (u, name, on, self) => {
+      const li = document.createElement('li'); li.className = 'chip' + (on ? ' on' : '') + (self ? ' self' : '');
+      const d = document.createElement('span'); d.className = 'dot';
+      const t = document.createElement('span'); t.textContent = name + (self ? ' (شما)' : '');
+      li.append(d, t);
+      const inM = self ? inMeet : meetSet.has(u);
+      if (inM) { const s = stOf(u); const x = document.createElement('span'); x.textContent = s.v === 'screen' ? '🖥' : (s.v === 'cam' ? '📷' : (s.m ? '🎤' : '👁')); li.append(x); }
+      if (host && host.u === u) { const h = document.createElement('span'); h.className = 'hosttag'; h.textContent = '👑 میزبان'; li.append(h); }
+      ul.append(li);
+    };
+    add(uid, myName, true, true);
+    const ids = Object.keys(roster);
+    ids.forEach(u => add(u, nameOf(u), isOnline(u), false));
+    if (host && host.u !== uid && !(host.u in roster)) {
+      const li = document.createElement('li'); li.className = 'chip';
+      const d = document.createElement('span'); d.className = 'dot';
+      const t = document.createElement('span'); t.textContent = host.n;
+      const h = document.createElement('span'); h.className = 'hosttag'; h.textContent = '👑 میزبان (ترک شده)';
+      li.append(d, t, h); ul.append(li);
+    }
+    const on = ids.filter(isOnline).length;
+    $('onlineCount').textContent = on + 1;
+    $('totalCount').textContent = ids.length + 1;
+    $('hint').hidden = ids.length > 0;
+    $('delBtn').hidden = !isHost();
+  }
+
+  // ---------- chat ----------
+  const chatLog = $('chatLog');
+  const EMPTY_HTML = '<div id="chatEmpty">هنوز پیامی نیست. پیام‌ها برای همه‌ی اعضا می‌مانند تا آخرین نفر گروه را ترک کند.</div>';
+  function cleanMsg(m){
+    if (!m || typeof m !== 'object') return null;
+    const id = String(m.id || '').slice(0, 60), x = String(m.x || '').slice(0, 500);
+    const ts = +m.ts;
+    if (!id || !isUid(m.from) || !x.trim() || !isFinite(ts) || ts <= 0 || ts > Date.now() + 864e5) return null;
+    return { id, from: m.from, n: clean(m.n) || 'ناشناس', x, ts };
+  }
+  function msgEl(m){
+    const self = m.from === uid;
+    const box = document.createElement('div'); box.className = 'msg' + (self ? ' self' : '');
+    const w = document.createElement('div'); w.className = 'who'; w.textContent = self ? myName : (nameOf(m.from) !== 'ناشناس' ? nameOf(m.from) : m.n);
+    const t = document.createElement('div'); t.className = 'txt'; t.dir = 'auto'; t.textContent = m.x;
+    const tm = document.createElement('time'); tm.textContent = fmtTime(m.ts).replace('امروز ', '');
+    box.append(w, t, tm); return box;
+  }
+  function renderChat(){
+    chatLog.innerHTML = '';
+    if (!chatArr.length) { chatLog.innerHTML = EMPTY_HTML; return; }
+    chatArr.forEach(m => chatLog.append(msgEl(m)));
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
+  function ingest(list, live){
+    let changed = false, full = false;
+    for (const raw of list) {
+      const m = cleanMsg(raw);
+      if (!m || chatArr.some(x => x.id === m.id)) continue;
+      if (!live && m.ts <= chatFloor) continue;
+      const last = chatArr[chatArr.length - 1];
+      if (!last || m.ts >= last.ts) {
+        chatArr.push(m);
+        if (!full) {
+          const e = $('chatEmpty'); if (e) e.remove();
+          const near = chatLog.scrollHeight - chatLog.scrollTop - chatLog.clientHeight < 60;
+          chatLog.append(msgEl(m));
+          if (near || m.from === uid) chatLog.scrollTop = chatLog.scrollHeight;
+        }
+      } else { chatArr.push(m); chatArr.sort((a, b) => a.ts - b.ts); full = true; }
+      changed = true;
+    }
+    if (chatArr.length > MAX_CHAT) { chatArr = chatArr.slice(-MAX_CHAT); full = true; }
+    if (full) renderChat();
+    if (changed) saveChat();
+    return changed;
+  }
+  function sendSync(u){ sendTo(u, { t: 'sync', have: chatArr.slice(-600).map(x => x.id) }); }
+  $('chatForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const inp = $('chatInput'); const text = inp.value.trim().slice(0, 500);
+    if (!text || !me) return;
+    const m = { id: uid + '.' + Date.now().toString(36) + (msgSeq++).toString(36), from: uid, n: myName, x: text, ts: Date.now() };
+    ingest([m], true);
+    broadcast({ t: 'chat', m });
+    inp.value = ''; inp.focus();
+  });
+
+  // ---------- networking ----------
+  function createPeer(){
+    if (leaving) return;
+    me = new Peer(pid(uid), peerOpts());
+    me.on('open', () => {
+      peerTries = 0; setConn('ok', 'آنلاین'); dg('سرور سیگنالینگ وصل شد');
+      if (!dirStarted) { dirStarted = true; claimDirectory(); }
+      connectAll();
+    });
+    me.on('connection', c => setupConn(c, false));
+    me.on('call', onMediaCall);
+    me.on('disconnected', () => {
+      if (leaving) return;
+      setConn('bad', 'قطع شد، اتصال مجدد…'); dg('ارتباط با سرور سیگنالینگ قطع شد');
+      setTimeout(() => { try { if (!leaving && me && me.disconnected) me.reconnect(); } catch (e) {} }, 1500);
+    });
+    me.on('error', e => {
+      dg('خطای PeerJS: ' + e.type + ' — ' + String(e.message || '').slice(0, 120));
+      if (e.type === 'unavailable-id') {
+        try { me.destroy(); } catch (x) {}
+        me = null; dirStarted = false;
+        if (++peerTries > 6) { setConn('bad', 'این حساب در تب دیگری باز است'); return; }
+        setConn('', 'در حال اتصال…');
+        setTimeout(createPeer, 3500);
+        return;
+      }
+      if (e.type === 'peer-unavailable') {
+        const m = String(e.message || ''); const u = uidOf(m.split(' ').pop());
+        if (u) pending.delete(u);
+        if (m.includes(dirId)) { joining = false; setTimeout(claimDirectory, 800 + Math.random() * 1200); }
+        return;
+      }
+      if (['network', 'server-error', 'socket-error', 'socket-closed'].includes(e.type)) setConn('bad', 'مشکل شبکه…');
+    });
+  }
+  function connectAll(){ Object.keys(roster).forEach(connectUid); }
+  function connectUid(u){
+    if (!me || !me.id || me.disconnected || u === uid || !isUid(u) || (u in gone) || isOnline(u) || pending.has(u)) return;
+    pending.add(u); setTimeout(() => { pending.delete(u); if (!isOnline(u)) dg('اتصال به ' + sh(u) + ' بعد از ۷ ثانیه برقرار نشد'); }, 7000);
+    dg('تلاش برای اتصال به ' + sh(u));
+    try { setupConn(me.connect(pid(u), { reliable: true, serialization: 'json' }), true); } catch (e) { pending.delete(u); dg('خطا در connect: ' + (e && e.message)); }
+  }
+  function setupConn(conn, outgoing){
+    const u = uidOf(conn.peer);
+    if (!isUid(u) || u === uid) { try { conn.close(); } catch (e) {} return; }
+    let rec = conns.get(u);
+    if (rec && rec.conn && rec.conn !== conn) {
+      const a = outgoing ? uid : u, b = rec.outgoing ? uid : u;
+      if (!(a === b || a < b)) { try { conn.close(); } catch (e) {} return; }
+      const old = rec.conn; rec.conn = conn; try { old.close(); } catch (e) {}
+    }
+    if (!rec) { rec = { uid: u, name: (roster[u] && roster[u].name) || '', conn: null }; conns.set(u, rec); }
+    rec.conn = conn; rec.outgoing = outgoing;
+    dg((outgoing ? 'اتصال خروجی' : 'اتصال ورودی') + ' با ' + sh(u));
+    setTimeout(() => hookIce(conn, u), 0);
+    const onOpen = () => { pending.delete(u); dg('کانال داده با ' + sh(u) + ' باز شد ✅'); sendHi(conn); renderMembers(); };
+    if (conn.open) onOpen(); else conn.on('open', onOpen);
+    conn.on('data', m => { if (rec.conn === conn) handleMsg(rec, m); });
+    conn.on('close', () => { dg('کانال داده با ' + sh(u) + ' بسته شد'); drop(u, conn); });
+    conn.on('error', e => { dg('خطای کانال با ' + sh(u) + ': ' + String((e && e.message) || e).slice(0, 100)); drop(u, conn); });
+  }
+  function sendHi(conn){
+    const list = Object.entries(roster).slice(0, 60).map(([u, r]) => ({ u, n: r.name }));
+    list.push({ u: uid, n: myName });
+    try { conn.send({ t: 'hi', name: myName, roster: list, gone: Object.entries(gone).slice(0, 60), host }); } catch (e) {}
+  }
+  function drop(u, conn){
+    const rec = conns.get(u);
+    if (!rec || rec.conn !== conn) return;
+    conns.delete(u); pending.delete(u);
+    if (!mc.has(u)) { meetSet.delete(u); pst.delete(u); }
+    renderMembers(); renderMeet();
+  }
+
+  // directory (برای پیدا کردن اعضای جدید)
+  function claimDirectory(){
+    if (leaving || claiming || dirConn) return;
+    claiming = true; let settled = false;
+    const dp = new Peer(dirId, peerOpts());
+    dp.on('open', () => {
+      settled = true; claiming = false; dirPeer = dp; dg('من نگهدارنده‌ی دایرکتوری شدم');
+      dp.on('connection', onDirIncoming);
+      dp.on('disconnected', () => { if (!leaving) { try { dp.reconnect(); } catch (e) {} } });
+      joinDirectory();
+    });
+    dp.on('error', e => {
+      if (settled) return;
+      settled = true; claiming = false;
+      try { dp.destroy(); } catch (x) {}
+      if (e.type === 'unavailable-id') joinDirectory(); else setTimeout(claimDirectory, 3000);
+    });
+  }
+  const dirMembers = new Map();
+  function onDirIncoming(conn){
+    conn.on('open', () => {
+      try { conn.send({ t: 'list', ids: [...dirMembers.keys()] }); } catch (e) {}
+      dirMembers.set(conn.peer, conn);
+    });
+    const g = () => { if (dirMembers.get(conn.peer) === conn) dirMembers.delete(conn.peer); };
+    conn.on('close', g); conn.on('error', g);
+  }
+  function joinDirectory(){
+    if (leaving || joining || dirConn || !me || !me.id) return;
+    joining = true; let c;
+    try { c = me.connect(dirId, { reliable: true, serialization: 'json' }); } catch (e) { joining = false; setTimeout(claimDirectory, 2000); return; }
+    const timer = setTimeout(() => { if (!dirConn) { joining = false; try { c.close(); } catch (e) {} setTimeout(claimDirectory, 500); } }, 9000);
+    c.on('open', () => { clearTimeout(timer); joining = false; dirConn = c; dg('به دایرکتوری وصل شدم'); });
+    c.on('data', m => {
+      if (m && m.t === 'list' && Array.isArray(m.ids)) {
+        dg('لیست دایرکتوری: ' + m.ids.length + ' نفر');
+        m.ids.forEach(p => {
+          const u = uidOf(p);
+          if (isUid(u) && u !== uid && !(u in gone)) { if (!roster[u]) { roster[u] = { name: 'ناشناس' }; saveRoster(); } connectUid(u); }
+        });
+      }
+    });
+    c.on('close', () => { clearTimeout(timer); joining = false; if (dirConn === c) dirConn = null; if (!leaving) setTimeout(claimDirectory, 300 + Math.random() * 1800); });
+    c.on('error', () => {});
+  }
+
+  // ---------- messages ----------
+  function handleMsg(rec, m){
+    if (!m || typeof m !== 'object') return;
+    const u = rec.uid;
+    switch (m.t) {
+      case 'hi': {
+        rec.name = clean(m.name) || 'ناشناس';
+        delete gone[u];
+        roster[u] = { name: rec.name, at: Date.now() };
+        if (m.host && isUid(m.host.u) && +m.host.ts > 0) {
+          const h = { u: m.host.u, n: clean(m.host.n) || 'ناشناس', ts: +m.host.ts };
+          if (h.u === u) h.n = rec.name;
+          if (!host || h.ts < host.ts || (h.u === host.u && h.n !== host.n)) setHost(h);
+        }
+        (Array.isArray(m.roster) ? m.roster.slice(0, 60) : []).forEach(x => {
+          if (!x || !isUid(x.u) || x.u === uid || (x.u in gone)) return;
+          if (!roster[x.u]) roster[x.u] = { name: clean(x.n) || 'ناشناس' };
+          connectUid(x.u);
+        });
+        (Array.isArray(m.gone) ? m.gone.slice(0, 60) : []).forEach(g => {
+          const id = g && g[0], ts = +g[1] || 0;
+          if (!isUid(id) || id === uid || isOnline(id)) return;
+          if ((id in gone) && gone[id] >= ts) return;
+          if (roster[id] && roster[id].at && roster[id].at > ts) return;
+          gone[id] = ts || Date.now(); delete roster[id];
+        });
+        saveGone(); saveRoster();
+        sendSync(u);
+        if (inMeet) sendTo(u, { t: 'mjoin', st: myState() });
+        if (isHost()) sendTo(u, { t: 'perm', allow: permAllow });
+        renderMembers(); renderMeet();
+        break;
+      }
+      case 'sync': {
+        const have = new Set(Array.isArray(m.have) ? m.have.slice(0, 600) : []);
+        const miss = chatArr.filter(x => !have.has(x.id)).slice(-300);
+        for (let i = 0; i < miss.length; i += 50) sendTo(u, { t: 'msgs', list: miss.slice(i, i + 50) });
+        break;
+      }
+      case 'msgs': if (Array.isArray(m.list)) ingest(m.list.slice(0, 60), false); break;
+      case 'chat': {
+        if (!m.m) return;
+        ingest([Object.assign({}, m.m, { from: u })], true); break;
+      }
+      case 'bye': {
+        gone[u] = Date.now(); saveGone(); delete roster[u]; saveRoster();
+        toast(nameOf(u) + ' گروه را ترک کرد');
+        meetSet.delete(u); pst.delete(u); closeMedia(u);
+        const r = conns.get(u); if (r) { conns.delete(u); try { r.conn.close(); } catch (e) {} }
+        renderMembers(); renderMeet(); break;
+      }
+      case 'destroy': {
+        if (!host || host.u !== u) return;
+        SS.set(PREFIX + 'notice', 'گروه «' + roomName + '» توسط میزبان حذف شد');
+        wipeRoomAll(); removeGroup(roomKey); teardown(); backHome();
+        break;
+      }
+      // ----- کنفرانس -----
+      case 'mjoin': {
+        const wasIn = meetSet.has(u);
+        meetSet.add(u); pst.set(u, normSt(m.st));
+        if (inMeet) sendTo(u, { t: 'min', st: myState() });
+        if (!wasIn) toast(nameOf(u) + ' وارد کنفرانس شد');
+        renderMembers(); renderMeet(); break;
+      }
+      case 'min': {
+        meetSet.add(u); pst.set(u, normSt(m.st));
+        if (inMeet && !mc.has(u)) callMedia(u);
+        renderMembers(); renderMeet(); break;
+      }
+      case 'mleave': {
+        meetSet.delete(u); pst.delete(u); closeMedia(u);
+        if (pinned === u) pinned = null;
+        renderMembers(); renderMeet(); break;
+      }
+      case 'st': {
+        const before = (pst.get(u) || {}).v;
+        meetSet.add(u); pst.set(u, normSt(m.st));
+        if (normSt(m.st).v === 'screen' && before !== 'screen') toast('🖥 ' + nameOf(u) + ' صفحه‌ی خود را منتشر کرد');
+        renderMembers(); renderMeet(); break;
+      }
+      case 'perm': {
+        if (!host || host.u !== u) return;
+        permAllow = !!m.allow; LS.set(k('allowshare'), permAllow);
+        if (!permAllow && !isHost() && screenTrack) { stopScreen(); toast('میزبان اجازه‌ی اشتراک صفحه را برداشت'); }
+        renderMeet(); break;
+      }
+    }
+  }
+
+  // ============================================================
+  //                    کنفرانس / استریم
+  // ============================================================
+  function ensureActx(){
+    if (actx && actx.state !== 'closed') return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    actx = new AC();
+    mix = actx.createMediaStreamDestination();       // صدای خروجی (میکروفون + صدای صفحه) از اینجا ارسال می‌شود
+    micGain = actx.createGain(); micGain.connect(mix);
+    selfAn = actx.createAnalyser(); selfAn.fftSize = 256; micGain.connect(selfAn);
+    levels.set(uid, { an: selfAn, src: null, buf: new Uint8Array(256) });
+  }
+  function getBlank(){
+    if (blank) return blank.track;
+    const c = document.createElement('canvas'); c.width = 320; c.height = 180;
+    const x = c.getContext('2d'); let n = 0;
+    const draw = () => { x.fillStyle = (n++ % 2) ? '#000' : '#010101'; x.fillRect(0, 0, 320, 180); };
+    draw();
+    const s = c.captureStream(2);
+    blank = { track: s.getVideoTracks()[0], timer: setInterval(draw, 500) };
+    return blank.track;
+  }
+  function releaseBlank(){ if (!blank) return; clearInterval(blank.timer); try { blank.track.stop(); } catch (e) {} blank = null; }
+  const screenLive = () => !!(screenTrack && screenTrack.readyState === 'live');
+  function curTrack(){
+    if (srcMode === 'screen' && screenLive()) return screenTrack;
+    if (srcMode === 'cam' && camTrack && camTrack.readyState === 'live') return camTrack;
+    return getBlank();
+  }
+  function curKind(){ const t = curTrack(); return t === screenTrack ? 'screen' : (t === camTrack ? 'cam' : null); }
+  function myState(){ return { v: inMeet ? curKind() : null, m: !!(micStream && micOn) }; }
+  function outStream(){ return new MediaStream([mix.stream.getAudioTracks()[0], curTrack()]); }
+  function broadcastState(){ broadcast({ t: 'st', st: myState() }); }
+
+  // --- میکروفون ---
+  async function enableMic(){
+    ensureActx();
+    if (!micStream || !micStream.getAudioTracks().some(t => t.readyState === 'live')) {
+      const s = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: false });
+      micStream = s; micSrc = actx.createMediaStreamSource(s); micSrc.connect(micGain);
+      s.getAudioTracks()[0].addEventListener('ended', () => { if (micStream === s) { micStream = null; micOn = false; try { micSrc.disconnect(); } catch (e) {} afterChange(); } });
+    }
+    micOn = true; micStream.getAudioTracks().forEach(t => { t.enabled = true; });
+    afterChange();
+  }
+  function disableMic(){
+    micOn = false; if (micStream) micStream.getAudioTracks().forEach(t => { t.enabled = false; });
+    afterChange();
+  }
+  function releaseMic(){
+    if (micStream) micStream.getTracks().forEach(t => t.stop());
+    try { micSrc && micSrc.disconnect(); } catch (e) {}
+    micStream = null; micSrc = null; micOn = false;
+  }
+
+  // --- دوربین ---
+  function getCam(f){
+    return navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: f }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } } });
+  }
+  function bindCam(s){
+    const t = s.getVideoTracks()[0]; try { t.contentHint = 'motion'; } catch (e) {}
+    camStream = s; camTrack = t;
+    t.addEventListener('ended', () => { if (camTrack === t) { camTrack = null; camStream = null; pushOut(); } });
+  }
+  async function enableCam(){
+    if (camTrack && camTrack.readyState === 'live') return;
+    bindCam(await getCam(facing));
+    if (!screenLive()) srcMode = 'cam';
+    pushOut();
+  }
+  function disableCam(){
+    if (camStream) camStream.getTracks().forEach(t => t.stop());
+    camStream = camTrack = null; facing = 'user';
+    pushOut();
+  }
+  async function flipCam(){
+    if (!camTrack) return;
+    const old = camTrack, want = facing === 'user' ? 'environment' : 'user';
+    old.stop();
+    let s, target = want;
+    try { s = await getCam(want); }
+    catch (e) {
+      target = facing;
+      try { s = await getCam(facing); toast('تعویض دوربین ممکن نشد'); }
+      catch (x) { toast('دوربین در دسترس نیست'); camTrack = null; camStream = null; pushOut(); return; }
+    }
+    facing = target; bindCam(s); pushOut();
+  }
+
+  // --- اشتراک صفحه ---
+  async function startScreen(){
+    if (!inMeet) return;
+    if (!canShare()) { toast('میزبان اجازه‌ی اشتراک صفحه نداده است'); return; }
+    if (!CAN_SCREEN) { toast('این مرورگر/دستگاه اشتراک صفحه را پشتیبانی نمی‌کند (روی کامپیوتر امتحان کنید)'); return; }
+    let s;
+    try { s = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: { ideal: 30, max: 30 }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: true }); }
+    catch (e) { if (e && e.name !== 'NotAllowedError' && e.name !== 'AbortError') toast('شروع اشتراک صفحه ممکن نشد'); return; }
+    if (!inMeet) { s.getTracks().forEach(t => t.stop()); return; }
+    ensureActx();
+    const v = s.getVideoTracks()[0]; try { v.contentHint = 'detail'; } catch (e) {}
+    screenStream = s; screenTrack = v;
+    const a = s.getAudioTracks()[0];
+    if (a) { try { screenAudioSrc = actx.createMediaStreamSource(new MediaStream([a])); screenAudioSrc.connect(mix); } catch (e) { screenAudioSrc = null; } }
+    v.addEventListener('ended', () => { if (screenTrack === v) stopScreen(); });
+    srcMode = 'screen'; pushOut();
+    toast(a ? '🖥 صفحه همراه با صدا منتشر شد' : '🖥 صفحه منتشر شد (بدون صدا — برای صدا، هنگام انتخاب «Share audio» را بزنید)');
+  }
+  function stopScreen(){
+    if (screenStream) screenStream.getTracks().forEach(t => { try { t.stop(); } catch (e) {} });
+    try { screenAudioSrc && screenAudioSrc.disconnect(); } catch (e) {}
+    screenStream = screenTrack = screenAudioSrc = null;
+    if (srcMode === 'screen') srcMode = 'cam';
+    pushOut();
+  }
+
+  // --- ارسال خروجی فعلی به همه ---
+  function pushOut(){
+    const t = curTrack();
+    mc.forEach(m => {
+      try {
+        const sd = m.call.peerConnection.getSenders().find(x => x.track && x.track.kind === 'video');
+        if (sd) sd.replaceTrack(t).then(() => tune(m.call)).catch(() => {});
+      } catch (e) {}
+    });
+    afterChange();
+  }
+  function afterChange(){ if (inMeet) broadcastState(); renderMembers(); renderMeet(); }
+  function tune(c){
+    try {
+      const pc = c.peerConnection; if (!pc) return;
+      const kind = curKind(), n = Math.max(1, mc.size);
+      pc.getSenders().forEach(sd => {
+        if (!sd.track || sd.track.kind !== 'video') return;
+        const p = sd.getParameters(); if (!p.encodings || !p.encodings.length) p.encodings = [{}];
+        p.encodings[0].maxBitrate = kind === 'screen' ? (n > 3 ? 800e3 : n > 1 ? 1500e3 : 2500e3) : kind === 'cam' ? (n > 3 ? 300e3 : n > 1 ? 500e3 : 900e3) : 50e3;
+        try { p.degradationPreference = kind === 'screen' ? 'maintain-resolution' : 'balanced'; } catch (e) {}
+        sd.setParameters(p).catch(() => {});
+      });
+    } catch (e) {}
+  }
+
+  // --- ورود / خروج ---
+  async function joinMeet(withMedia){
+    if (inMeet) return;
+    if (!me || !me.id || me.disconnected) { toast('هنوز به سرور وصل نیستید'); return; }
+    if (!window.isSecureContext || !navigator.mediaDevices) { toast('کنفرانس فقط روی HTTPS کار می‌کند'); return; }
+    try { ensureActx(); await actx.resume(); } catch (e) { toast('صدا در این مرورگر پشتیبانی نمی‌شود'); return; }
+    inMeet = true; srcMode = 'cam'; pinned = null;
+    $('prejoin').hidden = true; $('meetUI').hidden = false;
+    if (withMedia) {
+      try { await enableMic(); } catch (e) { toast('دسترسی به میکروفون داده نشد'); }
+      try { await enableCam(); } catch (e) { toast('دسترسی به دوربین داده نشد'); }
+    }
+    if (!inMeet) return;
+    broadcast({ t: 'mjoin', st: myState() });
+    clearInterval(levelTimer); levelTimer = setInterval(levelTick, 150);
+    try { if ('wakeLock' in navigator) navigator.wakeLock.request('screen').then(w => { wakeLock = w; }).catch(() => {}); } catch (e) {}
+    // اگر قبلاً اعضایی در کنفرانس بوده‌اند، به آن‌ها وصل شو
+    meetSet.forEach(u => { if (isOnline(u) && !mc.has(u)) callMedia(u); });
+    renderMembers(); renderMeet();
+  }
+  function leaveMeet(silent){
+    if (!inMeet) return;
+    inMeet = false;
+    broadcast({ t: 'mleave' });
+    [...mc.keys()].forEach(closeMedia);
+    if (screenStream) screenStream.getTracks().forEach(t => { try { t.stop(); } catch (e) {} });
+    screenStream = screenTrack = screenAudioSrc = null;
+    if (camStream) camStream.getTracks().forEach(t => t.stop());
+    camStream = camTrack = null; facing = 'user';
+    releaseMic(); releaseBlank();
+    levels.forEach(o => { try { o.src && o.src.disconnect(); } catch (e) {} }); levels.clear();
+    try { actx && actx.close(); } catch (e) {} actx = mix = micGain = selfAn = null;
+    clearInterval(levelTimer); levelTimer = null; connected.clear(); vstreams.clear();
+    try { wakeLock && wakeLock.release(); } catch (e) {} wakeLock = null;
+    srcMode = 'cam'; pinned = null;
+    $('prejoin').hidden = false; $('meetUI').hidden = true;
+    try { if (document.fullscreenElement) document.exitFullscreen(); } catch (e) {}
+    if (!silent) { renderMembers(); renderMeet(); }
+  }
+
+  // --- اتصال رسانه (mesh) ---
+  function callMedia(u){
+    if (!inMeet || !me || !mix || mc.has(u) || u === uid) return;
+    try {
+      const c = me.call(pid(u), outStream(), { metadata: { meet: 1 } });
+      mc.set(u, { call: c, out: true }); bindMedia(u, c);
+    } catch (e) { dg('خطا در call: ' + (e && e.message)); }
+  }
+  function bindMedia(u, c){
+    c.on('stream', s => { attachRemote(u, s); tune(c); });
+    const gone_ = () => {
+      const m = mc.get(u);
+      if (m && m.call === c) { mc.delete(u); detachRemote(u); renderMeet(); }
+    };
+    c.on('close', gone_); c.on('error', gone_);
+    setTimeout(() => hookIce(c, u), 0);
+    setTimeout(() => { if (inMeet && mc.get(u) && mc.get(u).call === c && !connected.has(u)) toast('اتصال تصویر/صدا با ' + nameOf(u) + ' برقرار نشد (شاید نیاز به سرور TURN باشد)'); }, 20000);
+  }
+  function onMediaCall(c){
+    const u = uidOf(c.peer);
+    if (!inMeet || !mix || !isUid(u) || !(c.metadata && c.metadata.meet)) { try { c.close(); } catch (e) {} return; }
+    const ex = mc.get(u);
+    if (ex) {
+      if (ex.out && uid < u) { try { c.close(); } catch (e) {} return; }
+      mc.delete(u); detachRemote(u); try { ex.call.close(); } catch (e) {}
+    }
+    meetSet.add(u);
+    mc.set(u, { call: c, out: false });
+    c.answer(outStream()); bindMedia(u, c); renderMeet();
+  }
+  function closeMedia(u){
+    const m = mc.get(u); if (!m) return;
+    mc.delete(u); detachRemote(u); try { m.call.close(); } catch (e) {}
+  }
+  function attachRemote(u, s){
+    let a = audios.get(u);
+    if (!a) { a = document.createElement('audio'); a.autoplay = true; a.setAttribute('playsinline', ''); document.body.appendChild(a); audios.set(u, a); }
+    a.srcObject = s; a.volume = vol;
+    const p = a.play(); if (p && p.catch) p.catch(() => {});
+    vstreams.set(u, s);
+    watch(u, s); connected.add(u);
+    renderMeet();
+  }
+  function detachRemote(u){
+    const a = audios.get(u); if (a) { a.srcObject = null; a.remove(); audios.delete(u); }
+    const l = levels.get(u); if (l && u !== uid) { try { l.src && l.src.disconnect(); } catch (e) {} levels.delete(u); }
+    vstreams.delete(u); connected.delete(u);
+  }
+  function watch(u, s){
+    if (!actx) return;
+    try {
+      const old = levels.get(u); if (old && old.src) { try { old.src.disconnect(); } catch (e) {} }
+      const src = actx.createMediaStreamSource(s); const an = actx.createAnalyser(); an.fftSize = 256;
+      src.connect(an); levels.set(u, { an, src, buf: new Uint8Array(256) });
+    } catch (e) {}
+  }
+  function levelTick(){
+    levels.forEach((o, u) => {
+      o.an.getByteTimeDomainData(o.buf);
+      let s = 0; for (let i = 0; i < o.buf.length; i++) { const x = (o.buf[i] - 128) / 128; s += x * x; }
+      const lvl = Math.sqrt(s / o.buf.length);
+      const on = lvl > 0.04 && (u !== uid || (micOn && !!micStream));
+      const t = vtiles.get(u); if (t) t.el.classList.toggle('speaking', on);
+    });
+  }
+
+  // --- صحنه‌ی تصویر ---
+  function box(el, x, y, w, h, r){
+    el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.width = w + 'px'; el.style.height = h + 'px'; el.style.borderRadius = r + 'px';
+  }
+  function getVT(u){
+    let t = vtiles.get(u); if (t) return t;
+    const el = document.createElement('div'); el.className = 'vt noanim'; el.dataset.u = u;
+    const v = document.createElement('video'); v.autoplay = true; v.muted = true; v.defaultMuted = true; v.playsInline = true;
+    v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.disablePictureInPicture = true;
+    const ph = document.createElement('div'); ph.className = 'ph';
+    const pa = document.createElement('div'); pa.className = 'pa'; ph.append(pa);
+    const nm = document.createElement('div'); nm.className = 'nm'; nm.dir = 'auto';
+    el.append(v, ph, nm);
+    $('stage').insertBefore(el, $('vMore'));
+    el.addEventListener('click', () => {
+      if (el.classList.contains('main')) { if (pinned) { pinned = null; renderTiles(); } }
+      else { pinned = u; renderTiles(); }
+    });
+    t = { el, v, pa, nm, fresh: true, local: null, lt: null }; vtiles.set(u, t); return t;
+  }
+  function pubList(){
+    if (!inMeet) return [];
+    const a = [];
+    if (myState().v || myState().m) a.push(uid);
+    meetSet.forEach(u => { if (u !== uid) { const s = pst.get(u); if (s && (s.v || s.m)) a.push(u); } });
+    return a;
+  }
+  function renderTiles(){
+    const st = $('stage'); if (!inMeet) return;
+    const list = pubList();
+    $('stagePh').hidden = list.length > 0;
+    vtiles.forEach((t, u) => { if (!list.includes(u)) { t.v.srcObject = null; t.el.remove(); vtiles.delete(u); } });
+    list.forEach(u => {
+      const t = getVT(u), self = u === uid, s = stOf(u);
+      let src = null;
+      if (s.v) {
+        if (self) { const tr = curTrack(); if (t.lt !== tr) { t.lt = tr; t.local = new MediaStream([tr]); } src = t.local; }
+        else src = vstreams.get(u) || null;
+      }
+      if (t.v.srcObject !== src) { t.v.srcObject = src; if (src) { const p = t.v.play(); if (p && p.catch) p.catch(() => {}); } }
+      t.el.classList.toggle('novid', !s.v || !src);
+      t.el.classList.toggle('screen', s.v === 'screen');
+      t.el.classList.toggle('mirror', self && s.v === 'cam' && facing === 'user');
+      const nm = nameOf(u) + (self ? ' (شما)' : '') + (s.v === 'screen' ? ' 🖥' : '') + (s.m ? '' : ' 🔇');
+      if (t.nm.textContent !== nm) t.nm.textContent = nm;
+      const ch = nameOf(u).trim().charAt(0) || '؟';
+      if (t.pa.textContent !== ch) t.pa.textContent = ch;
+    });
+    if (!list.length) return;
+    const W = st.clientWidth, H = st.clientHeight; if (!W || !H) return;
+    const others = list.filter(u => u !== uid);
+    let main;
+    if (pinned && list.includes(pinned)) main = pinned;
+    else {
+      const rs = others.filter(u => stOf(u).v === 'screen');
+      main = rs.find(u => host && u === host.u) || rs[0] || others.find(u => stOf(u).v) || others[0] || uid;
+    }
+    const rest = list.filter(u => u !== main);
+    const tw = W < 520 ? 96 : 140, th = Math.round(tw * 9 / 16), G = 8;
+    const cap = Math.max(0, Math.floor((W - G) / (tw + G)));
+    vtiles.forEach((t, u) => {
+      const el = t.el; el.classList.remove('main', 'small', 'pinned'); el.hidden = false;
+      if (u === main) { el.classList.add('main'); if (pinned === u) el.classList.add('pinned'); box(el, 0, 0, W, H, 0); }
+      else {
+        const i = rest.indexOf(u);
+        if (i < 0 || i >= cap) { el.hidden = true; return; }
+        el.classList.add('small'); box(el, G + i * (tw + G), H - th - G, tw, th, 10);
+      }
+      if (t.fresh) { t.fresh = false; requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove('noanim'))); }
+    });
+    const extra = Math.max(0, rest.length - cap);
+    const more = $('vMore'); more.hidden = extra === 0;
+    if (extra) more.textContent = '+' + extra.toLocaleString('fa-IR') + ' نفر دیگر';
+  }
+  if (window.ResizeObserver) new ResizeObserver(() => { if (inMeet) renderTiles(); }).observe($('stage'));
+  window.addEventListener('resize', () => { if (inMeet) renderTiles(); });
+  document.addEventListener('fullscreenchange', () => setTimeout(() => { if (inMeet) renderTiles(); }, 80));
+
+  function renderCtl(){
+    const s = myState(), sl = screenLive();
+    $('tbMic').classList.toggle('off', !s.m);
+    $('tbMic').textContent = s.m ? '🎤 میکروفون روشن' : '🔇 میکروفون خاموش';
+    const camOut = srcMode === 'cam' && !!camTrack, scrOut = srcMode === 'screen' && sl;
+    $('tbCam').classList.toggle('on', camOut);
+    $('tbScr').classList.toggle('on', scrOut);
+    $('tbCam').textContent = (srcMode === 'cam' && !camTrack) ? '📷 دوربین (خاموش)' : '📷 دوربین';
+    $('tbScr').classList.toggle('dis', !canShare() || !CAN_SCREEN);
+    $('tbScr').title = !CAN_SCREEN ? 'این دستگاه اشتراک صفحه ندارد' : (!canShare() ? 'فقط میزبان می‌تواند صفحه منتشر کند' : '');
+    $('tbStopScr').hidden = !sl;
+    $('tbFlip').hidden = !(IS_MOBILE && camTrack);
+    $('tbFull').hidden = !($('stage').requestFullscreen || $('stage').webkitRequestFullscreen);
+    $('permWrap').hidden = !isHost();
+    $('permChk').checked = permAllow;
+  }
+  function renderMeet(){
+    if (!roomKey) return;
+    const others = [...meetSet].filter(u => u !== uid);
+    const sharers = [...meetSet, ...(inMeet ? [uid] : [])].filter(u => stOf(u).v === 'screen');
+    const parts = [];
+    const total = others.length + (inMeet ? 1 : 0);
+    parts.push(total ? ('👥 ' + total.toLocaleString('fa-IR') + ' نفر در کنفرانس') : 'هنوز کسی در کنفرانس نیست.');
+    if (sharers.length) parts.push('🖥 ' + sharers.map(u => u === uid ? 'شما' : nameOf(u)).join('، ') + ' صفحه را منتشر می‌کند');
+    $('meetInfo').textContent = parts.join(' · ');
+    $('liveBadge').hidden = sharers.length === 0;
+    $('prejoin').hidden = inMeet; $('meetUI').hidden = !inMeet;
+    if (inMeet) { renderCtl(); renderTiles(); }
+  }
+
+  // کنترل‌ها
+  $('joinMeetBtn').addEventListener('click', () => joinMeet(true));
+  $('watchBtn').addEventListener('click', () => joinMeet(false));
+  $('tbLeave').addEventListener('click', () => leaveMeet());
+  $('tbMic').addEventListener('click', async () => {
+    if (micOn && micStream) { disableMic(); return; }
+    try { await enableMic(); } catch (e) { toast('دسترسی به میکروفون داده نشد. مجوز را در مرورگر فعال کنید.'); }
+  });
+  $('tbCam').addEventListener('click', async () => {
+    if (srcMode === 'screen' && screenLive()) {            // سوییچ از صفحه به دوربین
+      if (!camTrack) { try { await enableCam(); } catch (e) { toast('دسترسی به دوربین داده نشد. مجوز را در مرورگر فعال کنید.'); return; } }
+      srcMode = 'cam'; pushOut(); return;
+    }
+    if (camTrack) { disableCam(); return; }                // روشن/خاموش کردن دوربین
+    try { await enableCam(); } catch (e) { toast('دسترسی به دوربین داده نشد. مجوز را در مرورگر فعال کنید.'); }
+  });
+  $('tbScr').addEventListener('click', () => {
+    if (screenLive()) { if (srcMode !== 'screen') { srcMode = 'screen'; pushOut(); } return; }   // سوییچ از دوربین به صفحه
+    startScreen();
+  });
+  $('tbStopScr').addEventListener('click', stopScreen);
+  $('tbFlip').addEventListener('click', flipCam);
+  $('tbFull').addEventListener('click', () => {
+    const s = $('stage');
+    try { if (document.fullscreenElement) document.exitFullscreen(); else (s.requestFullscreen || s.webkitRequestFullscreen).call(s); }
+    catch (e) { toast('تمام‌صفحه در این مرورگر پشتیبانی نمی‌شود'); }
+  });
+  $('vol').addEventListener('input', e => { vol = parseFloat(e.target.value); audios.forEach(a => { a.volume = vol; }); });
+  $('permChk').addEventListener('change', e => {
+    if (!isHost()) { e.target.checked = permAllow; return; }
+    permAllow = e.target.checked; LS.set(k('allowshare'), permAllow);
+    broadcast({ t: 'perm', allow: permAllow });
+    toast(permAllow ? 'اعضا می‌توانند صفحه منتشر کنند' : 'فقط شما می‌توانید صفحه منتشر کنید');
+    renderCtl();
+  });
+
+  // ---------- join / lifecycle ----------
+  async function enter(name, room, pass, key){
+    myName = name; roomName = room; roomPass = pass;
+    roomKey = key || await roomToKey(room, pass);
+    dirId = PREFIX + roomKey + '-dir';
+    loadRoom();
+    if (!host && Object.keys(roster).length === 0) { host = { u: uid, n: myName, ts: Date.now() }; LS.set(k('host'), host); }
+    else if (host && host.u === uid && host.n !== myName) { host.n = myName; LS.set(k('host'), host); }
+    saveGroup();
+    SS.set(PREFIX + 'active', { name, room, pass });
+    const beat = () => LS.set(PREFIX + 'open', { key: roomKey, t: Date.now() });
+    beat(); clearInterval(beatTimer); beatTimer = setInterval(beat, 8000);
+    $('joinCard').hidden = true; $('app').hidden = false;
+    $('gName').textContent = roomName;
+    $('gidLine').textContent = 'شناسه‌ی گروه: ' + gidOf(roomKey) + ' (برای همه‌ی اعضا یکسان است)';
+    dg('ورود به گروه ' + gidOf(roomKey) + ' | ' + UA.slice(0, 90));
+    renderChat(); renderMembers(); renderMeet();
+    try { history.replaceState(null, '', '#' + encodeURIComponent(roomName)); } catch (e) {}
+    setConn('', 'در حال اتصال…');
+    leaving = false; peerTries = 0;
+    createPeer();
+    clearInterval(retryTimer);
+    retryTimer = setInterval(() => {
+      if (leaving || !me || !me.id || me.disconnected) return;
+      connectAll();
+      if (!dirConn && !claiming && !joining) claimDirectory();
+      if (inMeet) meetSet.forEach(u => { if (isOnline(u) && !mc.has(u)) callMedia(u); });   // ترمیم اتصال رسانه
+    }, 12000);
+  }
+  function teardown(){
+    leaving = true; clearInterval(retryTimer); clearInterval(beatTimer);
+    try { leaveMeet(true); } catch (e) {}
+    conns.forEach(r => { try { r.conn && r.conn.close(); } catch (e) {} }); conns.clear();
+    try { dirConn && dirConn.close(); } catch (e) {}
+    try { dirPeer && dirPeer.destroy(); } catch (e) {}
+    try { me && me.destroy(); } catch (e) {}
+  }
+  function backHome(){
+    LS.del(PREFIX + 'open'); SS.del(PREFIX + 'active');
+    try { history.replaceState(null, '', location.pathname); } catch (e) {}
+    location.reload();
+  }
+  $('joinBtn').addEventListener('click', async () => {
+    const err = $('err'); err.textContent = '';
+    const name = $('name').value.trim().slice(0, 20) || ('کاربر ' + Math.floor(Math.random() * 900 + 100));
+    const room = $('room').value.trim(); const pass = $('pass').value;
+    if (!room) { err.textContent = 'نام گروه را وارد کنید.'; return; }
+    if (typeof Peer === 'undefined') { err.textContent = 'کتابخانه PeerJS بارگذاری نشد. اینترنت یا فیلترشکن را بررسی کنید.'; return; }
+    if (!window.isSecureContext || !navigator.mediaDevices) { err.textContent = 'کنفرانس فقط روی HTTPS کار می‌کند.'; return; }
+    const key = await roomToKey(room, pass);
+    if (selectedGroup && selectedGroup.key !== key) {
+      err.textContent = selectedGroup.hasPass ? 'رمز گروه اشتباه است.' : 'این گروه رمز ندارد.';
+      return;
+    }
+    LS.set(PREFIX + 'lastname', name);
+    selectedGroup = null;
+    enter(name, room, pass, key);
+  });
+  [$('name'), $('room'), $('pass')].forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') $('joinBtn').click(); }));
+
+  $('copyBtn').addEventListener('click', async () => {
+    const url = location.href.split('#')[0] + '#' + encodeURIComponent(roomName);
+    try { await navigator.clipboard.writeText(url); toast('لینک کپی شد' + (roomPass ? ' (رمز گروه را جداگانه بدهید)' : '')); }
+    catch (e) { prompt('لینک گروه:', url); }
+  });
+  $('exitBtn').addEventListener('click', () => { exitChatPolicy(); saveGroup(); teardown(); backHome(); });
+  function openModal(mode){
+    modalMode = mode;
+    $('modalText').innerHTML = mode === 'delete'
+      ? '<b>حذف گروه؟</b><br>گروه برای همه‌ی اعضا حذف می‌شود و قابل بازگشت نیست.'
+      : '<b>ترک گروه؟</b><br>عضویت شما پاک می‌شود. گروه با برچسب «ترک شده» در صفحه نخست می‌ماند و اگر گروه باقی باشد می‌توانید دوباره وارد شوید.';
+    $('modalYes').textContent = mode === 'delete' ? 'بله، حذف کن' : 'بله، ترک کن';
+    $('modal').hidden = false;
+  }
+  $('leaveBtn').addEventListener('click', () => openModal('leave'));
+  $('delBtn').addEventListener('click', () => { if (isHost()) openModal('delete'); });
+  $('modalNo').addEventListener('click', () => { $('modal').hidden = true; });
+  $('modalYes').addEventListener('click', () => {
+    $('modal').hidden = true;
+    if (modalMode === 'delete') {
+      if (!isHost()) return;
+      broadcast({ t: 'destroy', ts: Date.now() });
+      setTimeout(() => { wipeRoomAll(); removeGroup(roomKey); SS.set(PREFIX + 'notice', 'گروه حذف شد'); teardown(); backHome(); }, 450);
+      return;
+    }
+    const lastMember = Object.keys(roster).length === 0;
+    broadcast({ t: 'bye', ts: Date.now() });
+    setTimeout(() => {
+      if (lastMember) { wipeRoomAll(); removeGroup(roomKey); }
+      else { exitChatPolicy(); markLeft(roomKey); }
+      teardown(); backHome();
+    }, 350);
+  });
+
+  $('dgTurn').addEventListener('click', testTurn);
+  $('dgReco').addEventListener('click', () => { dg('اتصال مجدد دستی'); kickNet(); });
+  $('dgCopy').addEventListener('click', async () => {
+    const txt = diagSummary() + '\n\n' + dlog.join('\n');
+    try { await navigator.clipboard.writeText(txt); toast('گزارش کپی شد'); } catch (e) { prompt('گزارش:', txt); }
+  });
+  $('diag').addEventListener('toggle', renderDiag);
+  setInterval(renderDiag, 2000);
+  window.addEventListener('online', kickNet);
+  window.addEventListener('pageshow', kickNet);
+  window.addEventListener('beforeunload', e => { if (inMeet) { e.preventDefault(); e.returnValue = ''; } });
+  window.addEventListener('pagehide', () => { try { leaveMeet(true); } catch (e) {} });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      kickNet();
+      if (inMeet) {
+        try { actx && actx.state !== 'running' && actx.resume(); } catch (e) {}
+        vtiles.forEach(t => { try { const p = t.v.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} });
+        audios.forEach(a => { try { const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} });
+      }
+    }
+  });
+
+  // ---------- init ----------
+  (function init(){
+    const act = SS.get(PREFIX + 'active', null);
+    const op = LS.get(PREFIX + 'open', null);
+    if (op && !act && /^[0-9a-f]{20}$/.test(op.key || '') && Date.now() - (op.t || 0) > 25000) {
+      if (LS.get(PREFIX + 'clrexit-' + op.key, false)) {
+        LS.del(PREFIX + 'chat-' + op.key); LS.set(PREFIX + 'floor-' + op.key, Date.now());
+      }
+      LS.del(PREFIX + 'open');
+    }
+    if (act && act.room) {
+      $('name').value = act.name || ''; $('room').value = act.room;
+      enter(act.name || 'کاربر', act.room, act.pass || '');
+      return;
+    }
+    $('joinCard').hidden = false;
+    $('name').value = LS.get(PREFIX + 'lastname', '') || '';
+    let h = '';
+    try { h = decodeURIComponent(location.hash.replace(/^#/, '')); } catch (e) { h = location.hash.replace(/^#/, ''); }
+    if (h) $('room').value = h;
+    ['room', 'pass'].forEach(id => $(id).addEventListener('input', updateGid));
+    updateGid();
+    if (IN_APP) $('err').textContent = 'به‌نظر می‌رسد لینک را داخل مرورگر یک پیام‌رسان باز کرده‌اید. برای کنفرانس، لینک را در Safari یا Chrome باز کنید (⋯ ← Open in Browser).';
+    renderGroups();
+    const note = SS.get(PREFIX + 'notice', null);
+    if (note) { SS.del(PREFIX + 'notice'); toast(note); }
+  })();
+})();
+</script>
+</body>
+</html>﻿
