@@ -1,13 +1,10 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1b1e18">
-<title>کنفرانس و استریم</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
+<title>Conference & Stream</title>
 <style>
   :root{
     --bg:#1b1e18; --panel:#252921; --panel2:#2f3429; --line:#3d4435;
@@ -27,7 +24,7 @@
   html,body{height:100%}
   body{
     margin:0; background:var(--bg); color:var(--text);
-    font-family:"Vazirmatn",Tahoma,"Segoe UI",system-ui,sans-serif; font-size:16px; line-height:1.7;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6;
     display:flex; justify-content:center;
     padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0);
   }
@@ -57,10 +54,9 @@
 
   #joinCard{max-width:460px; width:100%; align-self:center}
 
-  /* saved groups (home) */
   #groupsBox{margin-top:16px; padding-top:14px; border-top:1px dashed var(--line)}
   #groupList{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px}
-  .grp{width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px; text-align:right; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:var(--panel2); color:var(--text)}
+  .grp{width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px; text-align:left; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:var(--panel2); color:var(--text)}
   .grp:hover{border-color:var(--amber)}
   .grp.sel{border-color:var(--amber); box-shadow:0 0 0 2px color-mix(in srgb,var(--amber) 30%,transparent)}
   .grp .g1{min-width:0; display:flex; flex-direction:column}
@@ -96,11 +92,14 @@
   .joinrow .primary{flex:1 1 220px; width:auto}
   .joinrow .ghost{flex:1 1 180px}
 
-  #stage{position:relative; width:100%; aspect-ratio:16/9; background:#000; border-radius:12px; overflow:hidden; direction:ltr}
+  .req{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:10px 12px; border:1px solid var(--amber); border-radius:10px; background:color-mix(in srgb,var(--amber) 14%,var(--panel2)); font-size:.9rem}
+  .req .btns{display:flex; gap:8px}
+  #reqBox{display:flex; flex-direction:column; gap:8px}
+
+  #stage{position:relative; width:100%; aspect-ratio:16/9; background:#000; border-radius:12px; overflow:hidden}
   #stage:fullscreen{border-radius:0; aspect-ratio:auto}
   @media (max-width:600px){ #stage{aspect-ratio:4/5} }
-  #stagePh{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; color:#9aa; font-size:.95rem; padding:20px; direction:rtl}
-  #stageLive{position:absolute; top:10px; left:10px; z-index:6; direction:rtl}
+  #stagePh{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; color:#9aa; font-size:.95rem; padding:20px}
 
   .vt{
     position:absolute; left:0; top:0; width:100%; height:100%; overflow:hidden; background:#1c2030; z-index:1;
@@ -122,30 +121,30 @@
   .vt.speaking.small{border-color:var(--green); box-shadow:0 0 0 4px rgba(52,199,89,.35), 0 8px 22px rgba(0,0,0,.55)}
   .vt.speaking.main{box-shadow:inset 0 0 0 3px var(--green)}
   .vt.main.pinned{cursor:pointer}
-  #vMore{position:absolute; right:10px; top:10px; z-index:5; padding:3px 12px; border-radius:999px; background:rgba(0,0,0,.55); color:#fff; font-size:.75rem; direction:rtl}
+  #vMore{position:absolute; right:10px; top:10px; z-index:5; padding:3px 12px; border-radius:999px; background:rgba(0,0,0,.55); color:#fff; font-size:.75rem}
 
   .tbar{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; align-items:center}
   .tb{padding:9px 14px; border-radius:10px; border:1px solid var(--line); background:var(--panel2); color:var(--text); font-size:.88rem; white-space:nowrap}
   .tb:hover{border-color:var(--amber)}
   .tb.on{border-color:var(--amber); background:color-mix(in srgb,var(--amber) 22%,var(--panel2)); font-weight:800}
   .tb.off{border-color:var(--danger); color:var(--danger)}
-  .tb.dis{opacity:.5}
+  .tb.dis{opacity:.55}
   .tb.leave{background:var(--red); border-color:var(--red); color:#fff; font-weight:800}
+  .tb.small{padding:5px 12px; font-size:.82rem}
   .seg{display:inline-flex; border-radius:10px; overflow:hidden}
   .seg .tb{border-radius:0}
-  .seg .tb + .tb{border-inline-start:0}
-  .seg .tb:first-child{border-radius:0 10px 10px 0}
-  .seg .tb:last-child{border-radius:10px 0 0 10px}
+  .seg .tb:first-child{border-radius:10px 0 0 10px}
+  .seg .tb:last-child{border-radius:0 10px 10px 0}
   .row2{display:flex; flex-wrap:wrap; gap:14px 24px; align-items:center; justify-content:space-between; font-size:.85rem; color:var(--muted)}
   .row2 .vol{display:flex; align-items:center; gap:8px}
   .row2 input[type=range]{accent-color:var(--green); width:140px}
   .row2 .switch{color:var(--text); font-size:.85rem}
 
   #chatLog{height:220px; overflow-y:scroll; overscroll-behavior:contain; display:flex; flex-direction:column; gap:8px; padding:10px; background:var(--panel2); border:1px solid var(--line); border-radius:10px; scrollbar-width:thin}
-  #chatEmpty{margin:auto; text-align:center; color:var(--muted); font-size:.85rem; max-width:30ch}
+  #chatEmpty{margin:auto; text-align:center; color:var(--muted); font-size:.85rem; max-width:34ch}
   .chat{display:flex; flex-direction:column; gap:10px; padding:12px}
-  .msg{max-width:86%; padding:6px 10px 4px; border-radius:12px; background:var(--panel); border:1px solid var(--line); overflow-wrap:anywhere; flex:none; align-self:flex-end}
-  .msg.self{align-self:flex-start; background:color-mix(in srgb,var(--amber) 22%,var(--panel2)); border-color:color-mix(in srgb,var(--amber) 45%,var(--line))}
+  .msg{max-width:86%; padding:6px 10px 4px; border-radius:12px; background:var(--panel); border:1px solid var(--line); overflow-wrap:anywhere; flex:none; align-self:flex-start}
+  .msg.self{align-self:flex-end; background:color-mix(in srgb,var(--amber) 22%,var(--panel2)); border-color:color-mix(in srgb,var(--amber) 45%,var(--line))}
   .msg .who{font-size:.74rem; font-weight:800; color:var(--amber); line-height:1.5}
   .msg.self .who{color:var(--live)}
   .msg .txt{font-size:.95rem; line-height:1.6}
@@ -176,107 +175,117 @@
 <body>
 <main>
   <header>
-    <h1>کنفرانس و استریم</h1>
-    <div class="conn" id="conn"><i></i><span id="connText">آفلاین</span></div>
+    <h1>Conference &amp; Stream</h1>
+    <div class="conn" id="conn"><i></i><span id="connText">Offline</span></div>
   </header>
 
-  <!-- صفحه‌ی اول: ورود + گروه‌های قبلی -->
+  <!-- Home: join + saved groups -->
   <section class="card" id="joinCard" hidden>
-    <div class="field"><label for="name">نام شما</label><input type="text" id="name" maxlength="20" autocomplete="off"></div>
-    <div class="field"><label for="room">نام گروه</label><input type="text" id="room" maxlength="40" autocomplete="off" value="main"></div>
+    <div class="field"><label for="name">Your name</label><input type="text" id="name" maxlength="20" autocomplete="off"></div>
+    <div class="field"><label for="room">Group name</label><input type="text" id="room" maxlength="40" autocomplete="off" value="main"></div>
     <p id="pickHint" hidden></p>
-    <div class="field"><label for="pass">رمز گروه (اگر گروه رمز دارد)</label><input type="password" id="pass" maxlength="40" autocomplete="off"></div>
-    <p class="note" style="margin:0 0 12px">شناسه‌ی گروه: <b id="gidVal" style="color:var(--amber);letter-spacing:.12em">—</b> — اگر دو نفر وارد یک گروه شده‌اند، این شناسه باید برای هر دو یکسان باشد.</p>
-    <button class="primary" id="joinBtn">ورود / ساخت گروه</button>
+    <div class="field"><label for="pass">Group password (if the group has one)</label><input type="password" id="pass" maxlength="40" autocomplete="off"></div>
+    <p class="note" style="margin:0 0 12px">Group ID: <b id="gidVal" style="color:var(--amber);letter-spacing:.12em">—</b> — everyone in the same group must see the same ID.</p>
+    <button class="primary" id="joinBtn">Join / Create group</button>
     <p class="err" id="err" role="alert"></p>
 
     <div id="groupsBox" hidden>
-      <h3>گروه‌های شما</h3>
+      <h3>Your groups</h3>
       <ul id="groupList"></ul>
     </div>
 
-    <p class="note">دسترسی به میکروفون و دوربین فقط هنگام ورود به کنفرانس (یا روشن‌کردن آن‌ها) پرسیده می‌شود. عضویت شما در گروه‌ها روی همین دستگاه ذخیره می‌شود. با «ترک گروه»، گروه با برچسب «ترک شده» در لیست می‌ماند و اگر گروه هنوز باقی باشد می‌توانید دوباره وارد شوید.</p>
+    <p class="note">Microphone and camera access is requested only when you join the conference (or turn them on). Your group memberships are stored on this device. After "Leave group" the group stays in the list marked "left", and you can rejoin while it still exists.</p>
   </section>
 
-  <!-- اپ -->
+  <!-- App -->
   <section id="app" hidden style="display:flex;flex-direction:column;gap:14px">
     <div class="card head">
-      <div class="gname" id="gName">گروه</div>
+      <div class="gname" id="gName">Group</div>
       <div class="gsub" id="gidLine"></div>
-      <div class="gsub"><span id="onlineCount">1</span> نفر آنلاین · <span id="totalCount">1</span> عضو</div>
+      <div class="gsub"><span id="onlineCount">1</span> online · <span id="totalCount">1</span> members</div>
     </div>
 
     <div class="card" id="meetCard">
-      <div class="mhead"><h3>کنفرانس و پخش زنده</h3><span class="live" id="liveBadge" hidden>● پخش زنده</span></div>
+      <div class="mhead"><h3>Conference &amp; live stream</h3><span class="live" id="liveBadge" hidden>● LIVE</span></div>
       <p id="meetInfo"></p>
+      <div id="reqBox" hidden></div>
 
       <div class="joinrow" id="prejoin">
-        <button class="primary" id="joinMeetBtn">ورود به کنفرانس (دوربین + میکروفون)</button>
-        <button class="ghost" id="watchBtn">ورود فقط برای تماشا</button>
+        <button class="primary" id="joinMeetBtn">Join conference (camera + mic)</button>
+        <button class="ghost" id="watchBtn">Join as viewer only</button>
       </div>
 
       <div id="meetUI" hidden>
         <div id="stage">
-          <div id="stagePh">هنوز کسی تصویر یا صدا منتشر نمی‌کند. دوربین، میکروفون یا اشتراک صفحه را روشن کنید.</div>
+          <div id="stagePh">Nobody is sending video or audio yet. Turn on your camera, microphone or share your screen.</div>
           <div id="vMore" hidden></div>
         </div>
+
+        <div class="req" id="grantBar" style="margin-top:12px" hidden>
+          <span>✅ The host approved your screen-share request.</span>
+          <button class="tb on" id="grantStart">Start sharing</button>
+        </div>
+
         <div class="tbar" style="margin-top:12px">
-          <button class="tb" id="tbMic">🎤 میکروفون</button>
-          <div class="seg" role="group" aria-label="منبع تصویر">
-            <button class="tb" id="tbCam">📷 دوربین</button>
-            <button class="tb" id="tbScr">🖥 صفحه</button>
+          <button class="tb" id="tbMic">🎤 Microphone</button>
+          <div class="seg" role="group" aria-label="Video source">
+            <button class="tb" id="tbCam">📷 Camera</button>
+            <button class="tb" id="tbScr">🖥 Screen</button>
           </div>
-          <button class="tb" id="tbStopScr" hidden>⏹ توقف اشتراک صفحه</button>
-          <button class="tb" id="tbFlip" hidden>🔄 چرخش دوربین</button>
-          <button class="tb" id="tbFull">⛶ تمام‌صفحه</button>
-          <button class="tb leave" id="tbLeave">خروج از کنفرانس</button>
+          <button class="tb" id="tbSnd" hidden>🔊 Video sound</button>
+          <button class="tb" id="tbStopScr" hidden>⏹ Stop sharing</button>
+          <button class="tb" id="tbFlip" hidden>🔄 Flip camera</button>
+          <button class="tb" id="tbFull">⛶ Fullscreen</button>
+          <button class="tb leave" id="tbLeave">Leave conference</button>
         </div>
+        <div class="tbar" id="hostCtl" style="margin-top:8px" hidden></div>
         <div class="row2" style="margin-top:12px">
-          <label class="vol" style="margin:0"><span>بلندی صدا</span><input type="range" id="vol" min="0" max="1" step="0.05" value="1" aria-label="بلندی صدا"></label>
-          <label class="switch" id="permWrap" hidden><span>اجازه‌ی اشتراک صفحه به سایر اعضا</span><input type="checkbox" id="permChk"></label>
+          <label class="vol" style="margin:0"><span>Volume</span><input type="range" id="vol" min="0" max="1" step="0.05" value="1" aria-label="Volume"></label>
+          <label class="switch" id="permWrap" hidden><span>Auto-approve screen-share requests</span><input type="checkbox" id="permChk"></label>
         </div>
+        <p class="note" style="margin:8px 0 0">Tip: when sharing a video, tick “Share tab/system audio” in the browser picker and use a headset to avoid echo. The “Video sound” button lets others hear the video together with your voice.</p>
       </div>
     </div>
 
     <div class="card">
-      <h3>اعضا</h3>
+      <h3>Members</h3>
       <ul class="list" id="members"></ul>
-      <p id="hint">هنوز عضو دیگری نیست. لینک گروه را برای دوستانتان بفرستید.</p>
+      <p id="hint">Nobody else is here yet. Send the group link to your friends.</p>
     </div>
 
     <div class="card chat">
-      <h3 style="margin:0">پیام‌ها</h3>
+      <h3 style="margin:0">Messages</h3>
       <div id="chatLog" role="log" aria-live="polite"></div>
       <form id="chatForm" autocomplete="off">
-        <input type="text" id="chatInput" maxlength="500" placeholder="پیام بنویسید…" aria-label="متن پیام" enterkeyhint="send">
-        <button type="submit" id="chatSend">ارسال</button>
+        <input type="text" id="chatInput" maxlength="500" placeholder="Type a message…" aria-label="Message text" enterkeyhint="send">
+        <button type="submit" id="chatSend">Send</button>
       </form>
       <div class="chatopt">
-        <label class="switch"><span>با خروج من، پیام‌ها برای من پاک شود</span><input type="checkbox" id="clrExit"></label>
-        <small>اگر تیک نزده باشید، پیام‌ها مثل تاریخچه می‌مانند و با ورود دوباره می‌بینید. پیام‌ها تا وقتی همه‌ی اعضا گروه را ترک نکرده‌اند برای همه حفظ می‌شوند.</small>
+        <label class="switch"><span>Clear messages for me when I exit</span><input type="checkbox" id="clrExit"></label>
+        <small>If unchecked, messages are kept like history and you will see them when you return. Messages are kept for everyone until all members have left the group.</small>
       </div>
     </div>
 
     <div class="actions">
-      <button class="ghost" id="copyBtn">کپی لینک گروه</button>
-      <button class="ghost" id="exitBtn">بازگشت به صفحه نخست</button>
+      <button class="ghost" id="copyBtn">Copy group link</button>
+      <button class="ghost" id="exitBtn">Back to home</button>
     </div>
     <details class="card" id="diag">
-      <summary style="cursor:pointer;font-weight:800">🛠 وضعیت اتصال (عیب‌یابی)</summary>
+      <summary style="cursor:pointer;font-weight:800">🛠 Connection status (diagnostics)</summary>
       <div id="diagSum" style="font-size:.85rem; margin:10px 0; line-height:1.9; white-space:pre-line"></div>
       <div style="display:flex; gap:8px; flex-wrap:wrap">
-        <button class="ghost" id="dgTurn" type="button">تست TURN</button>
-        <button class="ghost" id="dgReco" type="button">اتصال مجدد</button>
-        <button class="ghost" id="dgCopy" type="button">کپی گزارش</button>
+        <button class="ghost" id="dgTurn" type="button">Test TURN</button>
+        <button class="ghost" id="dgReco" type="button">Reconnect</button>
+        <button class="ghost" id="dgCopy" type="button">Copy report</button>
       </div>
       <pre id="diagOut" dir="ltr" style="margin:10px 0 0; max-height:200px; overflow:auto; font-size:.7rem; line-height:1.5; background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:8px; white-space:pre-wrap; word-break:break-all; text-align:left"></pre>
     </details>
     <div class="leave-wrap">
       <div class="row">
-        <button class="ghost danger" id="leaveBtn">ترک گروه</button>
-        <button class="ghost danger" id="delBtn" hidden>حذف گروه</button>
+        <button class="ghost danger" id="leaveBtn">Leave group</button>
+        <button class="ghost danger" id="delBtn" hidden>Delete group</button>
       </div>
-      <small>«بازگشت به صفحه نخست» فقط شما را به لیست گروه‌ها می‌برد و عضو می‌مانید. «ترک گروه» عضویت شما را پاک می‌کند ولی گروه با برچسب «ترک شده» در لیست می‌ماند. «حذف گروه» (فقط میزبان) گروه را برای همه حذف می‌کند.</small>
+      <small>“Back to home” only returns you to the group list; you stay a member. “Leave group” removes your membership but keeps the group in your list marked “left”. “Delete group” (host only) deletes it for everyone.</small>
     </div>
   </section>
 </main>
@@ -284,7 +293,7 @@
 <div id="modal" hidden>
   <div class="box">
     <p id="modalText"></p>
-    <div class="actions"><button class="ghost danger" id="modalYes">بله</button><button class="ghost" id="modalNo">انصراف</button></div>
+    <div class="actions"><button class="ghost danger" id="modalYes">Yes</button><button class="ghost" id="modalNo">Cancel</button></div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -296,7 +305,7 @@
   const $ = id => document.getElementById(id);
   const PREFIX = 'wt2-';
   const MAX_CHAT = 500;
-  // برای اتصال پایدار بین شبکه‌های مختلف (دیتای موبایل ↔ وای‌فای) سرور TURN اختصاصی خودتان را اینجا بگذارید:
+  // For reliable connections across different networks (mobile data <-> Wi-Fi) add your own TURN server here:
   const MY_TURN = [
     // { urls: ['turn:YOUR_TURN_HOST:3478', 'turn:YOUR_TURN_HOST:3478?transport=tcp', 'turns:YOUR_TURN_HOST:443?transport=tcp'], username: 'USER', credential: 'PASS' }
   ];
@@ -308,13 +317,14 @@
     ...MY_TURN,
     { urls: ['turn:openrelay.metered.ca:80', 'turn:openrelay.metered.ca:443', 'turn:openrelay.metered.ca:443?transport=tcp', 'turns:openrelay.metered.ca:443?transport=tcp'], username: 'openrelayproject', credential: 'openrelayproject' }
   ] };
-  // سرور سیگنالینگ اختصاصی (اختیاری): { host: 'peer.example.com', port: 443, path: '/', secure: true }
+  // Optional own signaling server: { host: 'peer.example.com', port: 443, path: '/', secure: true }
   const PEER_SERVER = {};
   const peerOpts = () => Object.assign({ debug: 0, config: ICE }, PEER_SERVER);
   const IN_APP = /Telegram|Instagram|FBAN|FBAV|FB_IAB|Line\/|Snapchat|MicroMessenger|Twitter|GSA\//i.test(navigator.userAgent || '');
   const UA = navigator.userAgent || '';
   const IS_MOBILE = !!((navigator.userAgentData && navigator.userAgentData.mobile) || /Android|iPhone|iPad|iPod/i.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1));
   const CAN_SCREEN = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
+  const UNK = 'Unknown';
 
   // ---------- storage ----------
   const mkStore = st => ({
@@ -341,20 +351,25 @@
   const conns = new Map();
   const pending = new Set();
   let selectedGroup = null;
-  let permAllow = false;                 // اجازه‌ی اشتراک صفحه برای همه‌ی اعضا (توسط میزبان)
+  let permAllow = false;                 // host option: auto-approve screen-share requests
 
-  // کنفرانس
-  let inMeet = false;
+  // screen-share approval
+  let granted = false, grantFresh = false, pendingReq = false, pendingTimer = null;
+  const reqs = new Map();                // host side: uid -> timestamp of pending requests
+  const approved = new Set();            // host side: uids approved to share
+
+  // conference
+  let inMeet = false, announced = false;
   let actx = null, mix = null, micGain = null, selfAn = null;
   let micStream = null, micSrc = null, micOn = false;
   let camStream = null, camTrack = null, facing = 'user';
-  let screenStream = null, screenTrack = null, screenAudioSrc = null;
-  let srcMode = 'cam';                   // خروجی فعلی تصویر: 'cam' یا 'screen'
+  let screenStream = null, screenTrack = null, screenAudioSrc = null, screenGain = null, screenHasAudio = false, screenSoundOn = true;
+  let srcMode = 'cam';                   // current video output: 'cam' | 'screen'
   let blank = null;
   let pinned = null, vol = 1, wakeLock = null, levelTimer = null, retryTimer = null, beatTimer = null;
-  const meetSet = new Set();             // اعضای دیگری که در کنفرانس‌اند
-  const pst = new Map();                 // وضعیت اعضا: {v:'cam'|'screen'|null, m:bool}
-  const mc = new Map();                  // اتصال‌های رسانه
+  const meetSet = new Set();             // other members currently in the conference
+  const pst = new Map();                 // member state: {v:'cam'|'screen'|null, m:bool}
+  const mc = new Map();                  // media connections
   const audios = new Map(), levels = new Map(), connected = new Set(), vstreams = new Map(), vtiles = new Map();
 
   const k = n => PREFIX + n + '-' + roomKey;
@@ -363,16 +378,17 @@
   const clean = s => String(s || '').slice(0, 20);
   const isUid = s => typeof s === 'string' && /^[0-9a-f]{16}$/.test(s);
   const isOnline = u => { const r = conns.get(u); return !!(r && r.conn && r.conn.open); };
-  const nameOf = u => u === uid ? myName : ((roster[u] && roster[u].name) || (conns.get(u) && conns.get(u).name) || 'ناشناس');
+  const nameOf = u => u === uid ? myName : ((roster[u] && roster[u].name) || (conns.get(u) && conns.get(u).name) || UNK);
   const isHost = () => !!(host && host.u === uid);
-  const canShare = () => isHost() || permAllow || !host;
+  const canShare = () => isHost() || !host || permAllow || granted;
 
   // ---------- helpers ----------
   function toast(msg){
     const t = $('toast'); t.textContent = msg; t.classList.add('show');
-    clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2800);
+    clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 3200);
   }
   function setConn(state, text){ const c = $('conn'); c.className = 'conn ' + state; $('connText').textContent = text; }
+  // Normalizes text (Arabic/Persian letters & digits, invisible chars...) so the same group name always maps to the same key.
   function norm(s){
     s = String(s == null ? '' : s);
     try { s = s.normalize('NFKC'); } catch (e) {}
@@ -393,7 +409,7 @@
   }
   const gidOf = key => String(key || '').slice(0, 4).toUpperCase();
 
-  // ---------- عیب‌یابی ----------
+  // ---------- diagnostics ----------
   const dlog = [], cands = { host: 0, srflx: 0, relay: 0, prflx: 0 };
   const sh = u => String(u || '').slice(0, 4);
   function dg(msg){
@@ -404,18 +420,18 @@
   function diagSummary(){
     const L = [];
     const ios = /iPhone|iPad|iPod/.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1);
-    L.push('دستگاه: ' + (ios ? 'iOS' : (/Android/.test(UA) ? 'Android' : 'Desktop')) + (IN_APP ? ' | مرورگر درون‌برنامه‌ای!' : '') + (CAN_SCREEN ? ' | اشتراک صفحه ✅' : ' | اشتراک صفحه ❌'));
-    L.push('شناسه‌ی گروه: ' + gidOf(roomKey) + ' | شناسه‌ی من: ' + sh(uid));
-    L.push('سرور سیگنالینگ: ' + (me && me.open && !me.disconnected ? 'وصل ✅' : 'قطع ❌'));
-    L.push('دایرکتوری: ' + (dirPeer ? 'نگهدارنده ✅' : (dirConn ? 'عضو ✅' : 'نامشخص ⚠️')));
-    L.push('کاندیدهای ICE من: host=' + cands.host + ' srflx=' + cands.srflx + ' relay=' + cands.relay);
-    L.push('کنفرانس: ' + (inMeet ? 'داخل ✅ (' + mc.size + ' اتصال رسانه)' : 'بیرون'));
+    L.push('Device: ' + (ios ? 'iOS' : (/Android/.test(UA) ? 'Android' : 'Desktop')) + (IN_APP ? ' | in-app browser!' : '') + (CAN_SCREEN ? ' | screen share OK' : ' | no screen share'));
+    L.push('Group ID: ' + gidOf(roomKey) + ' | my ID: ' + sh(uid));
+    L.push('Signaling server: ' + (me && me.open && !me.disconnected ? 'connected ✅' : 'disconnected ❌'));
+    L.push('Directory: ' + (dirPeer ? 'holder ✅' : (dirConn ? 'member ✅' : 'unknown ⚠️')));
+    L.push('My ICE candidates: host=' + cands.host + ' srflx=' + cands.srflx + ' relay=' + cands.relay);
+    L.push('Conference: ' + (inMeet ? 'inside ✅ (' + mc.size + ' media links)' : 'outside'));
     const ids = Object.keys(roster);
-    if (!ids.length) L.push('اعضا: هنوز کسی پیدا نشده');
+    if (!ids.length) L.push('Members: nobody found yet');
     ids.forEach(u => {
       const r = conns.get(u); let ice = '';
       try { if (r && r.conn && r.conn.peerConnection) ice = ' | ICE: ' + r.conn.peerConnection.iceConnectionState; } catch (e) {}
-      L.push('• ' + nameOf(u) + ' (' + sh(u) + '): ' + (isOnline(u) ? 'متصل ✅' : 'قطع ❌') + ice);
+      L.push('• ' + nameOf(u) + ' (' + sh(u) + '): ' + (isOnline(u) ? 'connected ✅' : 'offline ❌') + ice);
     });
     return L.join('\n');
   }
@@ -436,7 +452,7 @@
     } catch (e) {}
   }
   async function testTurn(){
-    dg('تست TURN شروع شد (حدود ۹ ثانیه)…');
+    dg('TURN test started (about 9 seconds)…');
     const res = { host: 0, srflx: 0, relay: 0 };
     try {
       const pc = new RTCPeerConnection({ iceServers: ICE.iceServers });
@@ -445,9 +461,9 @@
       await pc.setLocalDescription(await pc.createOffer());
       await new Promise(r => { const t = setTimeout(r, 9000); pc.onicegatheringstatechange = () => { if (pc.iceGatheringState === 'complete') { clearTimeout(t); r(); } }; });
       pc.close();
-    } catch (e) { dg('خطا در تست: ' + (e && e.message)); }
-    dg('نتیجه‌ی تست: host=' + res.host + ' srflx=' + res.srflx + ' relay=' + res.relay);
-    const msg = res.relay > 0 ? 'TURN کار می‌کند ✅' : 'هیچ TURN فعالی پیدا نشد ❌ — برای اتصال بین شبکه‌های مختلف سرور TURN اختصاصی لازم است';
+    } catch (e) { dg('Test error: ' + (e && e.message)); }
+    dg('Test result: host=' + res.host + ' srflx=' + res.srflx + ' relay=' + res.relay);
+    const msg = res.relay > 0 ? 'TURN works ✅' : 'No working TURN found ❌ — connections across different networks need your own TURN server';
     dg(msg); toast(msg);
   }
   let gidSeq = 0;
@@ -471,9 +487,9 @@
   function fmtTime(ts){
     const d = new Date(ts);
     const same = d.toDateString() === new Date().toDateString();
-    let t; try { t = d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', hour12: false }); } catch (e) { t = d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0'); }
-    if (same) return 'امروز ' + t;
-    try { return d.toLocaleDateString('fa-IR', { month: 'short', day: 'numeric' }) + ' ' + t; } catch (e) { return t; }
+    const t = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+    if (same) return 'Today ' + t;
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + t;
   }
 
   // ---------- persistence ----------
@@ -487,7 +503,7 @@
     chatArr = (LS.get(k('chat'), []) || []).map(cleanMsg).filter(Boolean).slice(-MAX_CHAT);
     chatFloor = +LS.get(k('floor'), 0) || 0;
     const h = LS.get(k('host'), null);
-    host = (h && isUid(h.u) && +h.ts > 0) ? { u: h.u, n: clean(h.n) || 'ناشناس', ts: +h.ts } : null;
+    host = (h && isUid(h.u) && +h.ts > 0) ? { u: h.u, n: clean(h.n) || UNK, ts: +h.ts } : null;
     permAllow = !!LS.get(k('allowshare'), false);
     $('permChk').checked = permAllow;
     delete roster[uid];
@@ -497,9 +513,7 @@
     clearTimeout(chatSaveT); chatArr = []; LS.del(k('chat'));
     if (setFloor) { chatFloor = Date.now(); LS.set(k('floor'), chatFloor); }
   }
-  function wipeRoomAll(){
-    ['roster', 'gone', 'chat', 'floor', 'clrexit', 'host', 'allowshare'].forEach(n => LS.del(k(n)));
-  }
+  function wipeRoomAll(){ ['roster', 'gone', 'chat', 'floor', 'clrexit', 'host', 'allowshare'].forEach(n => LS.del(k(n))); }
   function exitChatPolicy(){ if ($('clrExit').checked) wipeChatLocal(true); }
   $('clrExit').addEventListener('change', e => LS.set(k('clrexit'), e.target.checked));
 
@@ -526,8 +540,8 @@
       const g1 = document.createElement('span'); g1.className = 'g1';
       const t = document.createElement('b'); t.append(document.createTextNode(g.room));
       if (g.hostName) { const hn = document.createElement('span'); hn.className = 'hostn'; hn.textContent = ' (' + g.hostName + ')'; t.append(hn); }
-      if (g.left) { const l = document.createElement('span'); l.className = 'left'; l.textContent = '(ترک شده)'; t.append(l); }
-      const s = document.createElement('small'); s.textContent = 'نام شما: ' + g.name;
+      if (g.left) { const l = document.createElement('span'); l.className = 'left'; l.textContent = '(left)'; t.append(l); }
+      const s = document.createElement('small'); s.textContent = 'Your name: ' + g.name;
       g1.append(t, s);
       const g2 = document.createElement('span'); g2.className = 'g2';
       g2.textContent = (g.hasPass ? '🔒 ' : '') + (g.last ? fmtTime(g.last) : '');
@@ -540,7 +554,7 @@
     selectedGroup = g;
     $('name').value = g.name; $('room').value = g.room; $('pass').value = ''; $('err').textContent = '';
     const h = $('pickHint'); h.hidden = false;
-    h.textContent = g.hasPass ? 'گروه «' + g.room + '» انتخاب شد. رمز گروه را وارد کنید و ورود را بزنید.' : 'گروه «' + g.room + '» انتخاب شد. ورود را بزنید.';
+    h.textContent = g.hasPass ? 'Group "' + g.room + '" selected. Enter the group password and press Join.' : 'Group "' + g.room + '" selected. Press Join.';
     renderGroups();
     window.scrollTo({ top: 0, behavior: 'smooth' });
     (g.hasPass ? $('pass') : $('joinBtn')).focus({ preventScroll: true });
@@ -556,11 +570,11 @@
     const add = (u, name, on, self) => {
       const li = document.createElement('li'); li.className = 'chip' + (on ? ' on' : '') + (self ? ' self' : '');
       const d = document.createElement('span'); d.className = 'dot';
-      const t = document.createElement('span'); t.textContent = name + (self ? ' (شما)' : '');
+      const t = document.createElement('span'); t.textContent = name + (self ? ' (you)' : '');
       li.append(d, t);
       const inM = self ? inMeet : meetSet.has(u);
       if (inM) { const s = stOf(u); const x = document.createElement('span'); x.textContent = s.v === 'screen' ? '🖥' : (s.v === 'cam' ? '📷' : (s.m ? '🎤' : '👁')); li.append(x); }
-      if (host && host.u === u) { const h = document.createElement('span'); h.className = 'hosttag'; h.textContent = '👑 میزبان'; li.append(h); }
+      if (host && host.u === u) { const h = document.createElement('span'); h.className = 'hosttag'; h.textContent = '👑 HOST'; li.append(h); }
       ul.append(li);
     };
     add(uid, myName, true, true);
@@ -570,7 +584,7 @@
       const li = document.createElement('li'); li.className = 'chip';
       const d = document.createElement('span'); d.className = 'dot';
       const t = document.createElement('span'); t.textContent = host.n;
-      const h = document.createElement('span'); h.className = 'hosttag'; h.textContent = '👑 میزبان (ترک شده)';
+      const h = document.createElement('span'); h.className = 'hosttag'; h.textContent = '👑 HOST (left)';
       li.append(d, t, h); ul.append(li);
     }
     const on = ids.filter(isOnline).length;
@@ -582,20 +596,20 @@
 
   // ---------- chat ----------
   const chatLog = $('chatLog');
-  const EMPTY_HTML = '<div id="chatEmpty">هنوز پیامی نیست. پیام‌ها برای همه‌ی اعضا می‌مانند تا آخرین نفر گروه را ترک کند.</div>';
+  const EMPTY_HTML = '<div id="chatEmpty">No messages yet. Messages stay for everyone until the last member leaves the group.</div>';
   function cleanMsg(m){
     if (!m || typeof m !== 'object') return null;
     const id = String(m.id || '').slice(0, 60), x = String(m.x || '').slice(0, 500);
     const ts = +m.ts;
     if (!id || !isUid(m.from) || !x.trim() || !isFinite(ts) || ts <= 0 || ts > Date.now() + 864e5) return null;
-    return { id, from: m.from, n: clean(m.n) || 'ناشناس', x, ts };
+    return { id, from: m.from, n: clean(m.n) || UNK, x, ts };
   }
   function msgEl(m){
     const self = m.from === uid;
     const box = document.createElement('div'); box.className = 'msg' + (self ? ' self' : '');
-    const w = document.createElement('div'); w.className = 'who'; w.textContent = self ? myName : (nameOf(m.from) !== 'ناشناس' ? nameOf(m.from) : m.n);
+    const w = document.createElement('div'); w.className = 'who'; w.textContent = self ? myName : (nameOf(m.from) !== UNK ? nameOf(m.from) : m.n);
     const t = document.createElement('div'); t.className = 'txt'; t.dir = 'auto'; t.textContent = m.x;
-    const tm = document.createElement('time'); tm.textContent = fmtTime(m.ts).replace('امروز ', '');
+    const tm = document.createElement('time'); tm.textContent = fmtTime(m.ts).replace('Today ', '');
     box.append(w, t, tm); return box;
   }
   function renderChat(){
@@ -643,7 +657,7 @@
     if (leaving) return;
     me = new Peer(pid(uid), peerOpts());
     me.on('open', () => {
-      peerTries = 0; setConn('ok', 'آنلاین'); dg('سرور سیگنالینگ وصل شد');
+      peerTries = 0; setConn('ok', 'Online'); dg('Signaling server connected');
       if (!dirStarted) { dirStarted = true; claimDirectory(); }
       connectAll();
     });
@@ -651,16 +665,16 @@
     me.on('call', onMediaCall);
     me.on('disconnected', () => {
       if (leaving) return;
-      setConn('bad', 'قطع شد، اتصال مجدد…'); dg('ارتباط با سرور سیگنالینگ قطع شد');
+      setConn('bad', 'Disconnected, reconnecting…'); dg('Lost connection to the signaling server');
       setTimeout(() => { try { if (!leaving && me && me.disconnected) me.reconnect(); } catch (e) {} }, 1500);
     });
     me.on('error', e => {
-      dg('خطای PeerJS: ' + e.type + ' — ' + String(e.message || '').slice(0, 120));
+      dg('PeerJS error: ' + e.type + ' — ' + String(e.message || '').slice(0, 120));
       if (e.type === 'unavailable-id') {
         try { me.destroy(); } catch (x) {}
         me = null; dirStarted = false;
-        if (++peerTries > 6) { setConn('bad', 'این حساب در تب دیگری باز است'); return; }
-        setConn('', 'در حال اتصال…');
+        if (++peerTries > 6) { setConn('bad', 'This account is open in another tab'); return; }
+        setConn('', 'Connecting…');
         setTimeout(createPeer, 3500);
         return;
       }
@@ -670,15 +684,15 @@
         if (m.includes(dirId)) { joining = false; setTimeout(claimDirectory, 800 + Math.random() * 1200); }
         return;
       }
-      if (['network', 'server-error', 'socket-error', 'socket-closed'].includes(e.type)) setConn('bad', 'مشکل شبکه…');
+      if (['network', 'server-error', 'socket-error', 'socket-closed'].includes(e.type)) setConn('bad', 'Network problem…');
     });
   }
   function connectAll(){ Object.keys(roster).forEach(connectUid); }
   function connectUid(u){
     if (!me || !me.id || me.disconnected || u === uid || !isUid(u) || (u in gone) || isOnline(u) || pending.has(u)) return;
-    pending.add(u); setTimeout(() => { pending.delete(u); if (!isOnline(u)) dg('اتصال به ' + sh(u) + ' بعد از ۷ ثانیه برقرار نشد'); }, 7000);
-    dg('تلاش برای اتصال به ' + sh(u));
-    try { setupConn(me.connect(pid(u), { reliable: true, serialization: 'json' }), true); } catch (e) { pending.delete(u); dg('خطا در connect: ' + (e && e.message)); }
+    pending.add(u); setTimeout(() => { pending.delete(u); if (!isOnline(u)) dg('Connection to ' + sh(u) + ' not established after 7 s'); }, 7000);
+    dg('Trying to connect to ' + sh(u));
+    try { setupConn(me.connect(pid(u), { reliable: true, serialization: 'json' }), true); } catch (e) { pending.delete(u); dg('connect error: ' + (e && e.message)); }
   }
   function setupConn(conn, outgoing){
     const u = uidOf(conn.peer);
@@ -691,13 +705,13 @@
     }
     if (!rec) { rec = { uid: u, name: (roster[u] && roster[u].name) || '', conn: null }; conns.set(u, rec); }
     rec.conn = conn; rec.outgoing = outgoing;
-    dg((outgoing ? 'اتصال خروجی' : 'اتصال ورودی') + ' با ' + sh(u));
+    dg((outgoing ? 'Outgoing link' : 'Incoming link') + ' with ' + sh(u));
     setTimeout(() => hookIce(conn, u), 0);
-    const onOpen = () => { pending.delete(u); dg('کانال داده با ' + sh(u) + ' باز شد ✅'); sendHi(conn); renderMembers(); };
+    const onOpen = () => { pending.delete(u); dg('Data channel with ' + sh(u) + ' open ✅'); sendHi(conn); renderMembers(); };
     if (conn.open) onOpen(); else conn.on('open', onOpen);
     conn.on('data', m => { if (rec.conn === conn) handleMsg(rec, m); });
-    conn.on('close', () => { dg('کانال داده با ' + sh(u) + ' بسته شد'); drop(u, conn); });
-    conn.on('error', e => { dg('خطای کانال با ' + sh(u) + ': ' + String((e && e.message) || e).slice(0, 100)); drop(u, conn); });
+    conn.on('close', () => { dg('Data channel with ' + sh(u) + ' closed'); drop(u, conn); });
+    conn.on('error', e => { dg('Channel error with ' + sh(u) + ': ' + String((e && e.message) || e).slice(0, 100)); drop(u, conn); });
   }
   function sendHi(conn){
     const list = Object.entries(roster).slice(0, 60).map(([u, r]) => ({ u, n: r.name }));
@@ -712,13 +726,13 @@
     renderMembers(); renderMeet();
   }
 
-  // directory (برای پیدا کردن اعضای جدید)
+  // directory (to discover new members)
   function claimDirectory(){
     if (leaving || claiming || dirConn) return;
     claiming = true; let settled = false;
     const dp = new Peer(dirId, peerOpts());
     dp.on('open', () => {
-      settled = true; claiming = false; dirPeer = dp; dg('من نگهدارنده‌ی دایرکتوری شدم');
+      settled = true; claiming = false; dirPeer = dp; dg('I am now the directory holder');
       dp.on('connection', onDirIncoming);
       dp.on('disconnected', () => { if (!leaving) { try { dp.reconnect(); } catch (e) {} } });
       joinDirectory();
@@ -744,13 +758,13 @@
     joining = true; let c;
     try { c = me.connect(dirId, { reliable: true, serialization: 'json' }); } catch (e) { joining = false; setTimeout(claimDirectory, 2000); return; }
     const timer = setTimeout(() => { if (!dirConn) { joining = false; try { c.close(); } catch (e) {} setTimeout(claimDirectory, 500); } }, 9000);
-    c.on('open', () => { clearTimeout(timer); joining = false; dirConn = c; dg('به دایرکتوری وصل شدم'); });
+    c.on('open', () => { clearTimeout(timer); joining = false; dirConn = c; dg('Connected to the directory'); });
     c.on('data', m => {
       if (m && m.t === 'list' && Array.isArray(m.ids)) {
-        dg('لیست دایرکتوری: ' + m.ids.length + ' نفر');
+        dg('Directory list: ' + m.ids.length + ' peers');
         m.ids.forEach(p => {
           const u = uidOf(p);
-          if (isUid(u) && u !== uid && !(u in gone)) { if (!roster[u]) { roster[u] = { name: 'ناشناس' }; saveRoster(); } connectUid(u); }
+          if (isUid(u) && u !== uid && !(u in gone)) { if (!roster[u]) { roster[u] = { name: UNK }; saveRoster(); } connectUid(u); }
         });
       }
     });
@@ -759,22 +773,27 @@
   }
 
   // ---------- messages ----------
+  // host-side enforcement: a member showing a screen without approval gets stopped
+  function enforceShare(u){
+    if (!isHost() || u === uid) return;
+    if (stOf(u).v === 'screen' && !(permAllow || approved.has(u))) sendTo(u, { t: 'srevoke' });
+  }
   function handleMsg(rec, m){
     if (!m || typeof m !== 'object') return;
     const u = rec.uid;
     switch (m.t) {
       case 'hi': {
-        rec.name = clean(m.name) || 'ناشناس';
+        rec.name = clean(m.name) || UNK;
         delete gone[u];
         roster[u] = { name: rec.name, at: Date.now() };
         if (m.host && isUid(m.host.u) && +m.host.ts > 0) {
-          const h = { u: m.host.u, n: clean(m.host.n) || 'ناشناس', ts: +m.host.ts };
+          const h = { u: m.host.u, n: clean(m.host.n) || UNK, ts: +m.host.ts };
           if (h.u === u) h.n = rec.name;
           if (!host || h.ts < host.ts || (h.u === host.u && h.n !== host.n)) setHost(h);
         }
         (Array.isArray(m.roster) ? m.roster.slice(0, 60) : []).forEach(x => {
           if (!x || !isUid(x.u) || x.u === uid || (x.u in gone)) return;
-          if (!roster[x.u]) roster[x.u] = { name: clean(x.n) || 'ناشناس' };
+          if (!roster[x.u]) roster[x.u] = { name: clean(x.n) || UNK };
           connectUid(x.u);
         });
         (Array.isArray(m.gone) ? m.gone.slice(0, 60) : []).forEach(g => {
@@ -786,7 +805,7 @@
         });
         saveGone(); saveRoster();
         sendSync(u);
-        if (inMeet) sendTo(u, { t: 'mjoin', st: myState() });
+        if (inMeet && announced) sendTo(u, { t: 'mjoin', st: myState() });
         if (isHost()) sendTo(u, { t: 'perm', allow: permAllow });
         renderMembers(); renderMeet();
         break;
@@ -804,58 +823,84 @@
       }
       case 'bye': {
         gone[u] = Date.now(); saveGone(); delete roster[u]; saveRoster();
-        toast(nameOf(u) + ' گروه را ترک کرد');
-        meetSet.delete(u); pst.delete(u); closeMedia(u);
+        toast(nameOf(u) + ' left the group');
+        meetSet.delete(u); pst.delete(u); closeMedia(u); reqs.delete(u); approved.delete(u);
         const r = conns.get(u); if (r) { conns.delete(u); try { r.conn.close(); } catch (e) {} }
         renderMembers(); renderMeet(); break;
       }
       case 'destroy': {
         if (!host || host.u !== u) return;
-        SS.set(PREFIX + 'notice', 'گروه «' + roomName + '» توسط میزبان حذف شد');
+        SS.set(PREFIX + 'notice', 'Group "' + roomName + '" was deleted by the host');
         wipeRoomAll(); removeGroup(roomKey); teardown(); backHome();
         break;
       }
-      // ----- کنفرانس -----
+      // ----- conference -----
       case 'mjoin': {
         const wasIn = meetSet.has(u);
         meetSet.add(u); pst.set(u, normSt(m.st));
-        if (inMeet) sendTo(u, { t: 'min', st: myState() });
-        if (!wasIn) toast(nameOf(u) + ' وارد کنفرانس شد');
+        if (inMeet && announced) sendTo(u, { t: 'min', st: myState() });
+        if (!wasIn) toast(nameOf(u) + ' joined the conference');
+        enforceShare(u);
         renderMembers(); renderMeet(); break;
       }
       case 'min': {
         meetSet.add(u); pst.set(u, normSt(m.st));
         if (inMeet && !mc.has(u)) callMedia(u);
+        enforceShare(u);
         renderMembers(); renderMeet(); break;
       }
       case 'mleave': {
-        meetSet.delete(u); pst.delete(u); closeMedia(u);
+        meetSet.delete(u); pst.delete(u); closeMedia(u); reqs.delete(u); approved.delete(u);
         if (pinned === u) pinned = null;
         renderMembers(); renderMeet(); break;
       }
       case 'st': {
         const before = (pst.get(u) || {}).v;
-        meetSet.add(u); pst.set(u, normSt(m.st));
-        if (normSt(m.st).v === 'screen' && before !== 'screen') toast('🖥 ' + nameOf(u) + ' صفحه‌ی خود را منتشر کرد');
+        const st = normSt(m.st);
+        meetSet.add(u); pst.set(u, st);
+        if (st.v === 'screen' && before !== 'screen') toast('🖥 ' + nameOf(u) + ' started sharing their screen');
+        enforceShare(u);
         renderMembers(); renderMeet(); break;
+      }
+      // ----- screen-share approval -----
+      case 'sreq': {
+        if (!isHost()) return;
+        if (permAllow || approved.has(u)) { approved.add(u); sendTo(u, { t: 'sgrant', ok: true }); return; }
+        reqs.set(u, Date.now());
+        toast('🖥 ' + nameOf(u) + ' wants to share their screen');
+        renderMeet(); break;
+      }
+      case 'sgrant': {
+        if (!host || host.u !== u) return;
+        pendingReq = false; clearTimeout(pendingTimer);
+        if (m.ok) { granted = true; grantFresh = true; toast('Host approved your request — press “Start sharing”'); }
+        else { granted = false; grantFresh = false; toast('The host declined your screen-share request'); }
+        renderMeet(); break;
+      }
+      case 'srevoke': {
+        if (!host || host.u !== u) return;
+        granted = false; grantFresh = false; pendingReq = false;
+        if (screenTrack) stopScreen();
+        toast('The host stopped your screen sharing');
+        renderMeet(); break;
       }
       case 'perm': {
         if (!host || host.u !== u) return;
         permAllow = !!m.allow; LS.set(k('allowshare'), permAllow);
-        if (!permAllow && !isHost() && screenTrack) { stopScreen(); toast('میزبان اجازه‌ی اشتراک صفحه را برداشت'); }
+        if (!permAllow && !isHost() && !granted && screenTrack) { stopScreen(); toast('Screen sharing now requires host approval'); }
         renderMeet(); break;
       }
     }
   }
 
   // ============================================================
-  //                    کنفرانس / استریم
+  //                 Conference / streaming
   // ============================================================
   function ensureActx(){
     if (actx && actx.state !== 'closed') return;
     const AC = window.AudioContext || window.webkitAudioContext;
     actx = new AC();
-    mix = actx.createMediaStreamDestination();       // صدای خروجی (میکروفون + صدای صفحه) از اینجا ارسال می‌شود
+    mix = actx.createMediaStreamDestination();       // outgoing audio (mic + shared video sound) is sent from here
     micGain = actx.createGain(); micGain.connect(mix);
     selfAn = actx.createAnalyser(); selfAn.fftSize = 256; micGain.connect(selfAn);
     levels.set(uid, { an: selfAn, src: null, buf: new Uint8Array(256) });
@@ -880,9 +925,9 @@
   function curKind(){ const t = curTrack(); return t === screenTrack ? 'screen' : (t === camTrack ? 'cam' : null); }
   function myState(){ return { v: inMeet ? curKind() : null, m: !!(micStream && micOn) }; }
   function outStream(){ return new MediaStream([mix.stream.getAudioTracks()[0], curTrack()]); }
-  function broadcastState(){ broadcast({ t: 'st', st: myState() }); }
+  function broadcastState(){ if (announced) broadcast({ t: 'st', st: myState() }); }
 
-  // --- میکروفون ---
+  // --- microphone ---
   async function enableMic(){
     ensureActx();
     if (!micStream || !micStream.getAudioTracks().some(t => t.readyState === 'live')) {
@@ -903,7 +948,7 @@
     micStream = null; micSrc = null; micOn = false;
   }
 
-  // --- دوربین ---
+  // --- camera ---
   function getCam(f){
     return navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: f }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } } });
   }
@@ -931,39 +976,64 @@
     try { s = await getCam(want); }
     catch (e) {
       target = facing;
-      try { s = await getCam(facing); toast('تعویض دوربین ممکن نشد'); }
-      catch (x) { toast('دوربین در دسترس نیست'); camTrack = null; camStream = null; pushOut(); return; }
+      try { s = await getCam(facing); toast('Could not switch camera'); }
+      catch (x) { toast('Camera unavailable'); camTrack = null; camStream = null; pushOut(); return; }
     }
     facing = target; bindCam(s); pushOut();
   }
 
-  // --- اشتراک صفحه ---
+  // --- screen share (with host approval) ---
+  function requestShare(){
+    if (canShare()) { startScreen(); return; }
+    if (pendingReq) { toast('Request already sent — waiting for the host…'); return; }
+    if (!host || !sendTo(host.u, { t: 'sreq' })) { toast('The host is offline, so approval is not possible right now'); return; }
+    pendingReq = true; clearTimeout(pendingTimer);
+    pendingTimer = setTimeout(() => { if (pendingReq) { pendingReq = false; toast('No answer from the host'); renderMeet(); } }, 90000);
+    toast('Request sent to the host. Waiting for approval…');
+    renderMeet();
+  }
   async function startScreen(){
     if (!inMeet) return;
-    if (!canShare()) { toast('میزبان اجازه‌ی اشتراک صفحه نداده است'); return; }
-    if (!CAN_SCREEN) { toast('این مرورگر/دستگاه اشتراک صفحه را پشتیبانی نمی‌کند (روی کامپیوتر امتحان کنید)'); return; }
+    if (!canShare()) { requestShare(); return; }
+    if (!CAN_SCREEN) { toast('This browser/device cannot share the screen (try a desktop browser)'); return; }
     let s;
-    try { s = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: { ideal: 30, max: 30 }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: true }); }
-    catch (e) { if (e && e.name !== 'NotAllowedError' && e.name !== 'AbortError') toast('شروع اشتراک صفحه ممکن نشد'); return; }
+    try { s = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: { ideal: 30, max: 30 }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: true, systemAudio: 'include' }); }
+    catch (e) { if (e && e.name !== 'NotAllowedError' && e.name !== 'AbortError') toast('Could not start screen sharing'); return; }
     if (!inMeet) { s.getTracks().forEach(t => t.stop()); return; }
     ensureActx();
     const v = s.getVideoTracks()[0]; try { v.contentHint = 'detail'; } catch (e) {}
-    screenStream = s; screenTrack = v;
+    screenStream = s; screenTrack = v; grantFresh = false;
     const a = s.getAudioTracks()[0];
-    if (a) { try { screenAudioSrc = actx.createMediaStreamSource(new MediaStream([a])); screenAudioSrc.connect(mix); } catch (e) { screenAudioSrc = null; } }
+    screenHasAudio = !!a; screenSoundOn = true;
+    if (a) {
+      try {
+        screenAudioSrc = actx.createMediaStreamSource(new MediaStream([a]));
+        screenGain = actx.createGain(); screenGain.gain.value = 1;
+        screenAudioSrc.connect(screenGain); screenGain.connect(mix);
+      } catch (e) { screenAudioSrc = screenGain = null; screenHasAudio = false; }
+    }
     v.addEventListener('ended', () => { if (screenTrack === v) stopScreen(); });
     srcMode = 'screen'; pushOut();
-    toast(a ? '🖥 صفحه همراه با صدا منتشر شد' : '🖥 صفحه منتشر شد (بدون صدا — برای صدا، هنگام انتخاب «Share audio» را بزنید)');
+    toast(screenHasAudio ? '🖥 Screen shared with video sound' : '🖥 Screen shared (no sound captured — tick “Share audio” in the picker to include it)');
   }
   function stopScreen(){
     if (screenStream) screenStream.getTracks().forEach(t => { try { t.stop(); } catch (e) {} });
     try { screenAudioSrc && screenAudioSrc.disconnect(); } catch (e) {}
-    screenStream = screenTrack = screenAudioSrc = null;
+    try { screenGain && screenGain.disconnect(); } catch (e) {}
+    screenStream = screenTrack = screenAudioSrc = screenGain = null; screenHasAudio = false;
     if (srcMode === 'screen') srcMode = 'cam';
     pushOut();
   }
+  function toggleSound(){
+    if (!screenLive()) return;
+    if (!screenHasAudio || !screenGain) { toast('No video sound was captured. Stop sharing and share again with “Share tab/system audio” ticked.'); return; }
+    screenSoundOn = !screenSoundOn;
+    screenGain.gain.value = screenSoundOn ? 1 : 0;
+    toast(screenSoundOn ? '🔊 Others can hear the video sound' : '🔈 Video sound muted for others');
+    renderCtl();
+  }
 
-  // --- ارسال خروجی فعلی به همه ---
+  // --- push current output to everyone ---
   function pushOut(){
     const t = curTrack();
     mc.forEach(m => {
@@ -974,7 +1044,7 @@
     });
     afterChange();
   }
-  function afterChange(){ if (inMeet) broadcastState(); renderMembers(); renderMeet(); }
+  function afterChange(){ broadcastState(); renderMembers(); renderMeet(); }
   function tune(c){
     try {
       const pc = c.peerConnection; if (!pc) return;
@@ -989,33 +1059,34 @@
     } catch (e) {}
   }
 
-  // --- ورود / خروج ---
+  // --- join / leave ---
   async function joinMeet(withMedia){
     if (inMeet) return;
-    if (!me || !me.id || me.disconnected) { toast('هنوز به سرور وصل نیستید'); return; }
-    if (!window.isSecureContext || !navigator.mediaDevices) { toast('کنفرانس فقط روی HTTPS کار می‌کند'); return; }
-    try { ensureActx(); await actx.resume(); } catch (e) { toast('صدا در این مرورگر پشتیبانی نمی‌شود'); return; }
-    inMeet = true; srcMode = 'cam'; pinned = null;
+    if (!me || !me.id || me.disconnected) { toast('Not connected to the server yet'); return; }
+    if (!window.isSecureContext || !navigator.mediaDevices) { toast('The conference only works over HTTPS'); return; }
+    try { ensureActx(); await actx.resume(); } catch (e) { toast('Audio is not supported in this browser'); return; }
+    inMeet = true; announced = false; srcMode = 'cam'; pinned = null;
     $('prejoin').hidden = true; $('meetUI').hidden = false;
     if (withMedia) {
-      try { await enableMic(); } catch (e) { toast('دسترسی به میکروفون داده نشد'); }
-      try { await enableCam(); } catch (e) { toast('دسترسی به دوربین داده نشد'); }
+      try { await enableMic(); } catch (e) { toast('Microphone access was not granted'); }
+      try { await enableCam(); } catch (e) { toast('Camera access was not granted'); }
     }
     if (!inMeet) return;
+    announced = true;
     broadcast({ t: 'mjoin', st: myState() });
     clearInterval(levelTimer); levelTimer = setInterval(levelTick, 150);
     try { if ('wakeLock' in navigator) navigator.wakeLock.request('screen').then(w => { wakeLock = w; }).catch(() => {}); } catch (e) {}
-    // اگر قبلاً اعضایی در کنفرانس بوده‌اند، به آن‌ها وصل شو
     meetSet.forEach(u => { if (isOnline(u) && !mc.has(u)) callMedia(u); });
     renderMembers(); renderMeet();
   }
   function leaveMeet(silent){
     if (!inMeet) return;
     inMeet = false;
-    broadcast({ t: 'mleave' });
+    if (announced) broadcast({ t: 'mleave' });
+    announced = false;
     [...mc.keys()].forEach(closeMedia);
     if (screenStream) screenStream.getTracks().forEach(t => { try { t.stop(); } catch (e) {} });
-    screenStream = screenTrack = screenAudioSrc = null;
+    screenStream = screenTrack = screenAudioSrc = screenGain = null; screenHasAudio = false;
     if (camStream) camStream.getTracks().forEach(t => t.stop());
     camStream = camTrack = null; facing = 'user';
     releaseMic(); releaseBlank();
@@ -1024,18 +1095,20 @@
     clearInterval(levelTimer); levelTimer = null; connected.clear(); vstreams.clear();
     try { wakeLock && wakeLock.release(); } catch (e) {} wakeLock = null;
     srcMode = 'cam'; pinned = null;
+    granted = false; grantFresh = false; pendingReq = false; clearTimeout(pendingTimer);
+    vtiles.forEach(t => { t.v.srcObject = null; t.el.remove(); }); vtiles.clear();
     $('prejoin').hidden = false; $('meetUI').hidden = true;
     try { if (document.fullscreenElement) document.exitFullscreen(); } catch (e) {}
     if (!silent) { renderMembers(); renderMeet(); }
   }
 
-  // --- اتصال رسانه (mesh) ---
+  // --- media connections (mesh) ---
   function callMedia(u){
     if (!inMeet || !me || !mix || mc.has(u) || u === uid) return;
     try {
       const c = me.call(pid(u), outStream(), { metadata: { meet: 1 } });
       mc.set(u, { call: c, out: true }); bindMedia(u, c);
-    } catch (e) { dg('خطا در call: ' + (e && e.message)); }
+    } catch (e) { dg('call error: ' + (e && e.message)); }
   }
   function bindMedia(u, c){
     c.on('stream', s => { attachRemote(u, s); tune(c); });
@@ -1045,7 +1118,7 @@
     };
     c.on('close', gone_); c.on('error', gone_);
     setTimeout(() => hookIce(c, u), 0);
-    setTimeout(() => { if (inMeet && mc.get(u) && mc.get(u).call === c && !connected.has(u)) toast('اتصال تصویر/صدا با ' + nameOf(u) + ' برقرار نشد (شاید نیاز به سرور TURN باشد)'); }, 20000);
+    setTimeout(() => { if (inMeet && mc.get(u) && mc.get(u).call === c && !connected.has(u)) toast('Video/audio link with ' + nameOf(u) + ' failed (a TURN server may be needed)'); }, 20000);
   }
   function onMediaCall(c){
     const u = uidOf(c.peer);
@@ -1095,7 +1168,7 @@
     });
   }
 
-  // --- صحنه‌ی تصویر ---
+  // --- stage ---
   function box(el, x, y, w, h, r){
     el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.width = w + 'px'; el.style.height = h + 'px'; el.style.borderRadius = r + 'px';
   }
@@ -1118,7 +1191,8 @@
   function pubList(){
     if (!inMeet) return [];
     const a = [];
-    if (myState().v || myState().m) a.push(uid);
+    const ms = myState();
+    if (ms.v || ms.m) a.push(uid);
     meetSet.forEach(u => { if (u !== uid) { const s = pst.get(u); if (s && (s.v || s.m)) a.push(u); } });
     return a;
   }
@@ -1138,9 +1212,9 @@
       t.el.classList.toggle('novid', !s.v || !src);
       t.el.classList.toggle('screen', s.v === 'screen');
       t.el.classList.toggle('mirror', self && s.v === 'cam' && facing === 'user');
-      const nm = nameOf(u) + (self ? ' (شما)' : '') + (s.v === 'screen' ? ' 🖥' : '') + (s.m ? '' : ' 🔇');
+      const nm = nameOf(u) + (self ? ' (you)' : '') + (s.v === 'screen' ? ' 🖥' : '') + (s.m ? '' : ' 🔇');
       if (t.nm.textContent !== nm) t.nm.textContent = nm;
-      const ch = nameOf(u).trim().charAt(0) || '؟';
+      const ch = nameOf(u).trim().charAt(0) || '?';
       if (t.pa.textContent !== ch) t.pa.textContent = ch;
     });
     if (!list.length) return;
@@ -1167,7 +1241,7 @@
     });
     const extra = Math.max(0, rest.length - cap);
     const more = $('vMore'); more.hidden = extra === 0;
-    if (extra) more.textContent = '+' + extra.toLocaleString('fa-IR') + ' نفر دیگر';
+    if (extra) more.textContent = '+' + extra + ' more';
   }
   if (window.ResizeObserver) new ResizeObserver(() => { if (inMeet) renderTiles(); }).observe($('stage'));
   window.addEventListener('resize', () => { if (inMeet) renderTiles(); });
@@ -1176,18 +1250,50 @@
   function renderCtl(){
     const s = myState(), sl = screenLive();
     $('tbMic').classList.toggle('off', !s.m);
-    $('tbMic').textContent = s.m ? '🎤 میکروفون روشن' : '🔇 میکروفون خاموش';
+    $('tbMic').textContent = s.m ? '🎤 Mic on' : '🔇 Mic off';
     const camOut = srcMode === 'cam' && !!camTrack, scrOut = srcMode === 'screen' && sl;
     $('tbCam').classList.toggle('on', camOut);
     $('tbScr').classList.toggle('on', scrOut);
-    $('tbCam').textContent = (srcMode === 'cam' && !camTrack) ? '📷 دوربین (خاموش)' : '📷 دوربین';
-    $('tbScr').classList.toggle('dis', !canShare() || !CAN_SCREEN);
-    $('tbScr').title = !CAN_SCREEN ? 'این دستگاه اشتراک صفحه ندارد' : (!canShare() ? 'فقط میزبان می‌تواند صفحه منتشر کند' : '');
+    $('tbCam').textContent = (srcMode === 'cam' && !camTrack) ? '📷 Camera (off)' : '📷 Camera';
+    $('tbScr').textContent = pendingReq ? '🖥 Waiting for host…' : (!sl && !canShare() ? '🖥 Request screen share' : '🖥 Screen');
+    $('tbScr').classList.toggle('dis', !CAN_SCREEN);
+    $('tbScr').title = !CAN_SCREEN ? 'This device cannot share its screen' : (!canShare() ? 'The host must approve your request' : '');
+    $('tbSnd').hidden = !sl;
+    const soundOn = screenHasAudio && screenSoundOn;
+    $('tbSnd').textContent = !screenHasAudio ? '🔈 No video sound' : (soundOn ? '🔊 Video sound: ON' : '🔈 Video sound: OFF');
+    $('tbSnd').classList.toggle('on', soundOn);
+    $('tbSnd').classList.toggle('off', !soundOn);
     $('tbStopScr').hidden = !sl;
     $('tbFlip').hidden = !(IS_MOBILE && camTrack);
     $('tbFull').hidden = !($('stage').requestFullscreen || $('stage').webkitRequestFullscreen);
     $('permWrap').hidden = !isHost();
     $('permChk').checked = permAllow;
+    $('grantBar').hidden = !(grantFresh && !sl && !isHost());
+  }
+  function renderReqs(){
+    const box = $('reqBox'); box.innerHTML = '';
+    const ids = isHost() ? [...reqs.keys()].filter(u => !approved.has(u)) : [];
+    box.hidden = ids.length === 0;
+    ids.forEach(u => {
+      const d = document.createElement('div'); d.className = 'req';
+      const sp = document.createElement('span'); sp.textContent = '🖥 ' + nameOf(u) + ' wants to share their screen';
+      const bt = document.createElement('div'); bt.className = 'btns';
+      const ok = document.createElement('button'); ok.className = 'tb on small'; ok.textContent = 'Allow';
+      const no = document.createElement('button'); no.className = 'tb off small'; no.textContent = 'Deny';
+      ok.onclick = () => { reqs.delete(u); approved.add(u); sendTo(u, { t: 'sgrant', ok: true }); renderMeet(); };
+      no.onclick = () => { reqs.delete(u); sendTo(u, { t: 'sgrant', ok: false }); renderMeet(); };
+      bt.append(ok, no); d.append(sp, bt); box.append(d);
+    });
+  }
+  function renderHostCtl(){
+    const hc = $('hostCtl'); hc.innerHTML = '';
+    const sharers = isHost() ? [...meetSet].filter(u => u !== uid && stOf(u).v === 'screen') : [];
+    hc.hidden = sharers.length === 0;
+    sharers.forEach(u => {
+      const b = document.createElement('button'); b.className = 'tb off small'; b.textContent = '⏹ Stop ' + nameOf(u) + '’s screen share';
+      b.onclick = () => { approved.delete(u); reqs.delete(u); sendTo(u, { t: 'srevoke' }); toast('Stopped ' + nameOf(u) + '’s screen share'); };
+      hc.append(b);
+    });
   }
   function renderMeet(){
     if (!roomKey) return;
@@ -1195,48 +1301,53 @@
     const sharers = [...meetSet, ...(inMeet ? [uid] : [])].filter(u => stOf(u).v === 'screen');
     const parts = [];
     const total = others.length + (inMeet ? 1 : 0);
-    parts.push(total ? ('👥 ' + total.toLocaleString('fa-IR') + ' نفر در کنفرانس') : 'هنوز کسی در کنفرانس نیست.');
-    if (sharers.length) parts.push('🖥 ' + sharers.map(u => u === uid ? 'شما' : nameOf(u)).join('، ') + ' صفحه را منتشر می‌کند');
+    parts.push(total ? ('👥 ' + total + (total === 1 ? ' person' : ' people') + ' in the conference') : 'Nobody is in the conference yet.');
+    if (sharers.length) parts.push('🖥 ' + sharers.map(u => u === uid ? 'You' : nameOf(u)).join(', ') + (sharers.length === 1 && sharers[0] !== uid ? ' is' : (sharers.length === 1 ? ' are' : ' are')) + ' sharing a screen');
     $('meetInfo').textContent = parts.join(' · ');
     $('liveBadge').hidden = sharers.length === 0;
     $('prejoin').hidden = inMeet; $('meetUI').hidden = !inMeet;
-    if (inMeet) { renderCtl(); renderTiles(); }
+    renderReqs();
+    if (inMeet) { renderCtl(); renderHostCtl(); renderTiles(); }
   }
 
-  // کنترل‌ها
+  // controls
   $('joinMeetBtn').addEventListener('click', () => joinMeet(true));
   $('watchBtn').addEventListener('click', () => joinMeet(false));
   $('tbLeave').addEventListener('click', () => leaveMeet());
   $('tbMic').addEventListener('click', async () => {
     if (micOn && micStream) { disableMic(); return; }
-    try { await enableMic(); } catch (e) { toast('دسترسی به میکروفون داده نشد. مجوز را در مرورگر فعال کنید.'); }
+    try { await enableMic(); } catch (e) { toast('Microphone access was not granted. Enable it in the browser settings.'); }
   });
   $('tbCam').addEventListener('click', async () => {
-    if (srcMode === 'screen' && screenLive()) {            // سوییچ از صفحه به دوربین
-      if (!camTrack) { try { await enableCam(); } catch (e) { toast('دسترسی به دوربین داده نشد. مجوز را در مرورگر فعال کنید.'); return; } }
+    if (srcMode === 'screen' && screenLive()) {            // switch from screen to camera
+      if (!camTrack) { try { await enableCam(); } catch (e) { toast('Camera access was not granted. Enable it in the browser settings.'); return; } }
       srcMode = 'cam'; pushOut(); return;
     }
-    if (camTrack) { disableCam(); return; }                // روشن/خاموش کردن دوربین
-    try { await enableCam(); } catch (e) { toast('دسترسی به دوربین داده نشد. مجوز را در مرورگر فعال کنید.'); }
+    if (camTrack) { disableCam(); return; }                // toggle camera off
+    try { await enableCam(); } catch (e) { toast('Camera access was not granted. Enable it in the browser settings.'); }
   });
   $('tbScr').addEventListener('click', () => {
-    if (screenLive()) { if (srcMode !== 'screen') { srcMode = 'screen'; pushOut(); } return; }   // سوییچ از دوربین به صفحه
-    startScreen();
+    if (screenLive()) { if (srcMode !== 'screen') { srcMode = 'screen'; pushOut(); } return; }   // switch from camera to screen
+    requestShare();
   });
+  $('grantStart').addEventListener('click', startScreen);
+  $('tbSnd').addEventListener('click', toggleSound);
   $('tbStopScr').addEventListener('click', stopScreen);
   $('tbFlip').addEventListener('click', flipCam);
   $('tbFull').addEventListener('click', () => {
     const s = $('stage');
     try { if (document.fullscreenElement) document.exitFullscreen(); else (s.requestFullscreen || s.webkitRequestFullscreen).call(s); }
-    catch (e) { toast('تمام‌صفحه در این مرورگر پشتیبانی نمی‌شود'); }
+    catch (e) { toast('Fullscreen is not supported in this browser'); }
   });
   $('vol').addEventListener('input', e => { vol = parseFloat(e.target.value); audios.forEach(a => { a.volume = vol; }); });
   $('permChk').addEventListener('change', e => {
     if (!isHost()) { e.target.checked = permAllow; return; }
     permAllow = e.target.checked; LS.set(k('allowshare'), permAllow);
     broadcast({ t: 'perm', allow: permAllow });
-    toast(permAllow ? 'اعضا می‌توانند صفحه منتشر کنند' : 'فقط شما می‌توانید صفحه منتشر کنید');
-    renderCtl();
+    if (permAllow) { reqs.forEach((_, u) => { approved.add(u); sendTo(u, { t: 'sgrant', ok: true }); }); reqs.clear(); }
+    else meetSet.forEach(u => enforceShare(u));
+    toast(permAllow ? 'Screen-share requests are now approved automatically' : 'Screen sharing now needs your approval');
+    renderMeet();
   });
 
   // ---------- join / lifecycle ----------
@@ -1253,11 +1364,11 @@
     beat(); clearInterval(beatTimer); beatTimer = setInterval(beat, 8000);
     $('joinCard').hidden = true; $('app').hidden = false;
     $('gName').textContent = roomName;
-    $('gidLine').textContent = 'شناسه‌ی گروه: ' + gidOf(roomKey) + ' (برای همه‌ی اعضا یکسان است)';
-    dg('ورود به گروه ' + gidOf(roomKey) + ' | ' + UA.slice(0, 90));
+    $('gidLine').textContent = 'Group ID: ' + gidOf(roomKey) + ' (same for all members)';
+    dg('Joined group ' + gidOf(roomKey) + ' | ' + UA.slice(0, 90));
     renderChat(); renderMembers(); renderMeet();
     try { history.replaceState(null, '', '#' + encodeURIComponent(roomName)); } catch (e) {}
-    setConn('', 'در حال اتصال…');
+    setConn('', 'Connecting…');
     leaving = false; peerTries = 0;
     createPeer();
     clearInterval(retryTimer);
@@ -1265,7 +1376,7 @@
       if (leaving || !me || !me.id || me.disconnected) return;
       connectAll();
       if (!dirConn && !claiming && !joining) claimDirectory();
-      if (inMeet) meetSet.forEach(u => { if (isOnline(u) && !mc.has(u)) callMedia(u); });   // ترمیم اتصال رسانه
+      if (inMeet && announced) meetSet.forEach(u => { if (isOnline(u) && !mc.has(u)) callMedia(u); });   // repair media links
     }, 12000);
   }
   function teardown(){
@@ -1283,14 +1394,14 @@
   }
   $('joinBtn').addEventListener('click', async () => {
     const err = $('err'); err.textContent = '';
-    const name = $('name').value.trim().slice(0, 20) || ('کاربر ' + Math.floor(Math.random() * 900 + 100));
+    const name = $('name').value.trim().slice(0, 20) || ('User ' + Math.floor(Math.random() * 900 + 100));
     const room = $('room').value.trim(); const pass = $('pass').value;
-    if (!room) { err.textContent = 'نام گروه را وارد کنید.'; return; }
-    if (typeof Peer === 'undefined') { err.textContent = 'کتابخانه PeerJS بارگذاری نشد. اینترنت یا فیلترشکن را بررسی کنید.'; return; }
-    if (!window.isSecureContext || !navigator.mediaDevices) { err.textContent = 'کنفرانس فقط روی HTTPS کار می‌کند.'; return; }
+    if (!room) { err.textContent = 'Enter a group name.'; return; }
+    if (typeof Peer === 'undefined') { err.textContent = 'PeerJS failed to load. Check your internet connection or VPN.'; return; }
+    if (!window.isSecureContext || !navigator.mediaDevices) { err.textContent = 'The conference only works over HTTPS.'; return; }
     const key = await roomToKey(room, pass);
     if (selectedGroup && selectedGroup.key !== key) {
-      err.textContent = selectedGroup.hasPass ? 'رمز گروه اشتباه است.' : 'این گروه رمز ندارد.';
+      err.textContent = selectedGroup.hasPass ? 'Wrong group password.' : 'This group has no password.';
       return;
     }
     LS.set(PREFIX + 'lastname', name);
@@ -1301,16 +1412,16 @@
 
   $('copyBtn').addEventListener('click', async () => {
     const url = location.href.split('#')[0] + '#' + encodeURIComponent(roomName);
-    try { await navigator.clipboard.writeText(url); toast('لینک کپی شد' + (roomPass ? ' (رمز گروه را جداگانه بدهید)' : '')); }
-    catch (e) { prompt('لینک گروه:', url); }
+    try { await navigator.clipboard.writeText(url); toast('Link copied' + (roomPass ? ' (share the password separately)' : '')); }
+    catch (e) { prompt('Group link:', url); }
   });
   $('exitBtn').addEventListener('click', () => { exitChatPolicy(); saveGroup(); teardown(); backHome(); });
   function openModal(mode){
     modalMode = mode;
     $('modalText').innerHTML = mode === 'delete'
-      ? '<b>حذف گروه؟</b><br>گروه برای همه‌ی اعضا حذف می‌شود و قابل بازگشت نیست.'
-      : '<b>ترک گروه؟</b><br>عضویت شما پاک می‌شود. گروه با برچسب «ترک شده» در صفحه نخست می‌ماند و اگر گروه باقی باشد می‌توانید دوباره وارد شوید.';
-    $('modalYes').textContent = mode === 'delete' ? 'بله، حذف کن' : 'بله، ترک کن';
+      ? '<b>Delete group?</b><br>The group is deleted for all members and cannot be restored.'
+      : '<b>Leave group?</b><br>Your membership is removed. The group stays on the home screen marked “left”, and you can rejoin while it still exists.';
+    $('modalYes').textContent = mode === 'delete' ? 'Yes, delete' : 'Yes, leave';
     $('modal').hidden = false;
   }
   $('leaveBtn').addEventListener('click', () => openModal('leave'));
@@ -1321,7 +1432,7 @@
     if (modalMode === 'delete') {
       if (!isHost()) return;
       broadcast({ t: 'destroy', ts: Date.now() });
-      setTimeout(() => { wipeRoomAll(); removeGroup(roomKey); SS.set(PREFIX + 'notice', 'گروه حذف شد'); teardown(); backHome(); }, 450);
+      setTimeout(() => { wipeRoomAll(); removeGroup(roomKey); SS.set(PREFIX + 'notice', 'Group deleted'); teardown(); backHome(); }, 450);
       return;
     }
     const lastMember = Object.keys(roster).length === 0;
@@ -1334,10 +1445,10 @@
   });
 
   $('dgTurn').addEventListener('click', testTurn);
-  $('dgReco').addEventListener('click', () => { dg('اتصال مجدد دستی'); kickNet(); });
+  $('dgReco').addEventListener('click', () => { dg('Manual reconnect'); kickNet(); });
   $('dgCopy').addEventListener('click', async () => {
     const txt = diagSummary() + '\n\n' + dlog.join('\n');
-    try { await navigator.clipboard.writeText(txt); toast('گزارش کپی شد'); } catch (e) { prompt('گزارش:', txt); }
+    try { await navigator.clipboard.writeText(txt); toast('Report copied'); } catch (e) { prompt('Report:', txt); }
   });
   $('diag').addEventListener('toggle', renderDiag);
   setInterval(renderDiag, 2000);
@@ -1368,7 +1479,7 @@
     }
     if (act && act.room) {
       $('name').value = act.name || ''; $('room').value = act.room;
-      enter(act.name || 'کاربر', act.room, act.pass || '');
+      enter(act.name || 'User', act.room, act.pass || '');
       return;
     }
     $('joinCard').hidden = false;
@@ -1378,7 +1489,7 @@
     if (h) $('room').value = h;
     ['room', 'pass'].forEach(id => $(id).addEventListener('input', updateGid));
     updateGid();
-    if (IN_APP) $('err').textContent = 'به‌نظر می‌رسد لینک را داخل مرورگر یک پیام‌رسان باز کرده‌اید. برای کنفرانس، لینک را در Safari یا Chrome باز کنید (⋯ ← Open in Browser).';
+    if (IN_APP) $('err').textContent = 'You seem to have opened the link inside a messenger’s browser. Open it in Safari or Chrome instead (⋯ → Open in Browser).';
     renderGroups();
     const note = SS.get(PREFIX + 'notice', null);
     if (note) { SS.del(PREFIX + 'notice'); toast(note); }
